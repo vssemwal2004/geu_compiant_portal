@@ -19,7 +19,7 @@ import StatusStepper from '../../components/tickets/StatusStepper';
 import Timeline from '../../components/tickets/Timeline';
 import { PriorityBadge, StatusBadge } from '../../components/ui/Badges';
 import { useToast } from '../../components/ui/Toast';
-import { assetTypes, users } from '../../data/mockData';
+import { assetTypes, users } from '../../data/referenceData';
 import {
   availableTransitions,
   canAssign,
@@ -182,7 +182,7 @@ function Actions({ ticket: t, user, onDone }: { ticket: Ticket; user: User; onDo
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
 
-  function run(o: TransitionOption) {
+  async function run(o: TransitionOption) {
     if (o.noteLabel && !pending) {
       setPending(o);
       setNote('');
@@ -193,10 +193,12 @@ function Actions({ ticket: t, user, onDone }: { ticket: Ticket; user: User; onDo
       setError('Please add a short note.');
       return;
     }
-    changeStatus(user, t.id, o.to, note);
-    setPending(null);
-    setNote('');
-    onDone(`${t.id}: ${o.label.toLowerCase()} — done`);
+    try {
+      await changeStatus(user, t.id, o.to, note);
+      setPending(null);
+      setNote('');
+      onDone(`${t.id}: ${o.label.toLowerCase()} — done`);
+    } catch (error) { setError(error instanceof Error ? error.message : 'Action failed.'); }
   }
 
   return (
@@ -273,12 +275,14 @@ function Composer({ ticket: t, user, onDone }: { ticket: Ticket; user: User; onD
   const [body, setBody] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('PUBLIC');
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     if (!body.trim()) return;
-    addUpdate(user, t.id, body, visibility);
-    setBody('');
-    onDone(visibility === 'INTERNAL' ? 'Internal note added' : 'Update posted');
+    try {
+      await addUpdate(user, t.id, body, visibility);
+      setBody('');
+      onDone(visibility === 'INTERNAL' ? 'Internal note added' : 'Update posted');
+    } catch (error) { onDone(error instanceof Error ? error.message : 'Action failed.'); }
   }
 
   return (
@@ -322,12 +326,14 @@ function AssignPanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User; 
   const [reason, setReason] = useState('');
   const closed = t.status === 'CLOSED' || t.status === 'CANCELLED';
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     if (!assignee || assignee === t.assignedTo) return;
-    reassign(user, t.id, assignee, reason);
-    setReason('');
-    onDone(`Assigned to ${userName(assignee)}`);
+    try {
+      await reassign(user, t.id, assignee, reason);
+      setReason('');
+      onDone(`Assigned to ${userName(assignee)}`);
+    } catch (error) { onDone(error instanceof Error ? error.message : 'Action failed.'); }
   }
 
   return (
@@ -375,13 +381,15 @@ function EscalatePanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     if (!reason.trim()) return;
-    requestEscalation(user, t.id, reason);
-    setReason('');
-    setOpen(false);
-    onDone('Escalation sent to the Main Admin');
+    try {
+      await requestEscalation(user, t.id, reason);
+      setReason('');
+      setOpen(false);
+      onDone('Escalation sent to the Main Admin');
+    } catch (error) { onDone(error instanceof Error ? error.message : 'Action failed.'); }
   }
 
   return (

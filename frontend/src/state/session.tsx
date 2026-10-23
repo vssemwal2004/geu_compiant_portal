@@ -1,11 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import { users } from '../data/mockData';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { users, locations, assetTypes, routingRules } from '../data/referenceData';
+import { api } from '../api';
 import type { Role, User } from '../domain/types';
-
-// Stand-in for the backend session (HttpOnly cookie + GET /auth/me).
-// Only the user id is kept in sessionStorage, and only so a page refresh keeps you signed in.
-
-const KEY = 'geu.session';
 
 export const roleHome: Record<Role, string> = {
   MAIN_ADMIN: '/admin',
@@ -21,49 +17,46 @@ export const roleLabel: Record<Role, string> = {
 
 interface SessionValue {
   user: User | null;
-  signIn: (identifier: string) => User | null;
+  signIn: (identifier: string, password: string) => Promise<User>;
   signOut: () => void;
+  refreshReference: () => Promise<void>;
 }
 
 const SessionContext = createContext<SessionValue | null>(null);
 
-function restore(): User | null {
-  try {
-    const id = sessionStorage.getItem(KEY);
-    return users.find((u) => u.id === id) ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(restore);
+  const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
 
-  const signIn = useCallback((identifier: string) => {
-    const needle = identifier.trim().toLowerCase();
-    const found = users.find((u) => u.email === needle || u.employeeId.toLowerCase() === needle) ?? null;
-    if (found) {
-      setUser(found);
-      try {
-        sessionStorage.setItem(KEY, found.id);
-      } catch {
-        /* storage unavailable: session lasts until reload */
-      }
-    }
-    return found;
+  const loadReference = useCallback(async () => {
+    const data = await api<{ users: User[]; locations: typeof locations; assetTypes: typeof assetTypes; routingRules: typeof routingRules }>('/reference');
+    users.splice(0, users.length, ...data.users);
+    locations.splice(0, locations.length, ...data.locations);
+    assetTypes.splice(0, assetTypes.length, ...data.assetTypes);
+    routingRules.splice(0, routingRules.length, ...data.routingRules);
   }, []);
+
+  useEffect(() => {
+    api<{ user: User }>('/auth/me').then(async ({ user }) => {
+      await loadReference();
+      setUser(user);
+    }).catch(() => setUser(null)).finally(() => setReady(true));
+  }, [loadReference]);
+
+  const signIn = useCallback(async (identifier: string, password: string) => {
+    const { user } = await api<{ user: User }>('/auth/login', { method: 'POST', body: JSON.stringify({ identifier, password }) });
+    await loadReference();
+    setUser(user);
+    return user;
+  }, [loadReference]);
 
   const signOut = useCallback(() => {
+    void api('/auth/logout', { method: 'POST' }).catch(() => {});
     setUser(null);
-    try {
-      sessionStorage.removeItem(KEY);
-    } catch {
-      /* ignore */
-    }
   }, []);
 
-  const value = useMemo(() => ({ user, signIn, signOut }), [user, signIn, signOut]);
-  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+  const value = useMemo(() => ({ user, signIn, signOut, refreshReference: loadReference }), [user, signIn, signOut, loadReference]);
+  return <SessionContext.Provider value={value}>{ready ? children : <div className="loading-screen">Loading portal…</div>}</SessionContext.Provider>;
 }
 
 export function useSession() {

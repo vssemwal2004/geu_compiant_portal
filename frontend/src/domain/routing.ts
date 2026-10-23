@@ -1,4 +1,4 @@
-import { routingRules, users } from '../data/mockData';
+import { routingRules, users } from '../data/referenceData';
 import { ancestry } from './locations';
 import type { RoutingRule } from './types';
 

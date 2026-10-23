@@ -43,7 +43,7 @@ export const navByRole: Record<Role, NavGroup[]> = {
     {
       title: 'Configuration',
       items: [
-        { label: 'Users', path: '/admin/users', icon: Users, placeholder: true },
+        { label: 'Users', path: '/admin/users', icon: Users },
         { label: 'Locations', path: '/admin/locations', icon: MapPin, placeholder: true },
         { label: 'Asset Types', path: '/admin/asset-types', icon: Boxes, placeholder: true },
         { label: 'Routing Rules', path: '/admin/routing-rules', icon: GitBranch, placeholder: true },

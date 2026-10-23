@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent } from 'react';
+import { useMemo, useRef, useState, type CSSProperties, type DragEvent } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import AssetIcon from '../../components/tickets/AssetIcon';
 import { PriorityBadge } from '../../components/ui/Badges';
-import { assetTypes } from '../../data/mockData';
+import { assetTypes } from '../../data/referenceData';
 import { SLA_HOURS } from '../../domain/lifecycle';
 import { childrenOf, getLocation, locationPath, permittedBuildings } from '../../domain/locations';
 import { resolveRoute } from '../../domain/routing';
@@ -51,8 +51,6 @@ export default function CreateTicketPage() {
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState<Ticket | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  // Preview URLs now owned by a submitted ticket; these must not be revoked.
-  const keptUrls = useRef(new Set<string>());
 
   const buildings = useMemo(() => permittedBuildings(user), [user]);
   const floors = buildingId ? childrenOf(buildingId) : [];
@@ -60,20 +58,15 @@ export default function CreateTicketPage() {
   const asset = assetTypes.find((a) => a.id === assetTypeId);
   const route = labId && assetTypeId ? resolveRoute(labId, assetTypeId) : null;
 
-  // Release the preview image if the form is abandoned (a submitted ticket keeps it).
-  useEffect(
-    () => () => {
-      if (photo && !keptUrls.current.has(photo.url)) URL.revokeObjectURL(photo.url);
-    },
-    [photo],
-  );
-
   function takeFile(file: File | undefined) {
     if (!file) return;
     if (!MIME.includes(file.type)) return setPhotoError('Use a JPG, PNG or WebP image.');
     if (file.size > MAX_BYTES) return setPhotoError('Image must be 5 MB or smaller.');
     setPhotoError('');
-    setPhoto({ url: URL.createObjectURL(file), name: file.name });
+    const reader = new FileReader();
+    reader.onload = () => setPhoto({ url: String(reader.result), name: file.name });
+    reader.onerror = () => setPhotoError('Could not read this image.');
+    reader.readAsDataURL(file);
   }
 
   function onDrop(e: DragEvent) {
@@ -103,18 +96,19 @@ export default function CreateTicketPage() {
   async function submit() {
     if (submitting || valid.slice(0, 4).some((v) => !v)) return;
     setSubmitting(true);
-    // Mirrors the backend's single transactional create; the button is disabled to avoid duplicates.
-    await new Promise((r) => setTimeout(r, 700));
-    if (photo) keptUrls.current.add(photo.url);
-    const ticket = createTicket(user, {
-      locationId: labId,
-      assetTypeId,
-      description: description.trim(),
-      source: 'PORTAL',
-      imageUrl: photo?.url,
-    });
-    setCreated(ticket);
-    setSubmitting(false);
+    try {
+      const ticket = await createTicket(user, {
+        locationId: labId,
+        assetTypeId,
+        description: description.trim(),
+        imageUrl: photo?.url,
+      });
+      setCreated(ticket);
+    } catch (error) {
+      setPhotoError(error instanceof Error ? error.message : 'Could not create ticket.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function reset() {
@@ -143,12 +137,12 @@ export default function CreateTicketPage() {
             <span>
               {created.assignedTo ? (
                 <>
-                  Routed to <strong>{userName(created.assignedTo)}</strong>. You will get updates here and on WhatsApp.
+                  Routed to <strong>{userName(created.assignedTo)}</strong>. You can track updates here.
                 </>
               ) : (
                 <>
                   No team is mapped to this lab and asset yet, so it is in the <strong>unassigned queue</strong>. The
-                  Main Admin has been notified.
+                  Main Admin can assign it from the unassigned queue.
                 </>
               )}
             </span>
@@ -174,7 +168,7 @@ export default function CreateTicketPage() {
             <ArrowLeft size={16} /> Dashboard
           </Link>
           <h2>Raise a complaint</h2>
-          <p>Five quick steps — the same as on the GEU WhatsApp bot.</p>
+          <p>Five quick steps to report a campus issue.</p>
         </div>
       </div>
 

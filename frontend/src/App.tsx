@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import AppLayout from './layouts/AppLayout';
 import DashboardPage from './pages/admin/DashboardPage';
+import UsersPage from './pages/admin/UsersPage';
 import SubAdminDashboard from './pages/subadmin/SubAdminDashboard';
 import LabDashboard from './pages/lab/LabDashboard';
 import CreateTicketPage from './pages/shared/CreateTicketPage';
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="unassigned" element={<TicketsPage unassignedOnly />} />
         <Route path="tickets/:id" element={<TicketDetailPage />} />
         <Route path="new" element={<CreateTicketPage />} />
+        <Route path="users" element={<UsersPage />} />
         {placeholderRoutes('MAIN_ADMIN', '/admin')}
       </Route>
 

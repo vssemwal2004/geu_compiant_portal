@@ -1,4 +1,4 @@
-import { users } from '../data/mockData';
+import { users } from '../data/referenceData';
 
 export function timeAgo(iso: string, now = Date.now()): string {
   const diff = Math.max(0, now - new Date(iso).getTime());

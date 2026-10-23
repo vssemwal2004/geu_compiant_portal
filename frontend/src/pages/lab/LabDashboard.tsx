@@ -8,7 +8,6 @@ import {
   ClipboardCheck,
   Clock3,
   Lock,
-  MessageCircle,
   PlusCircle,
   Route,
   ThumbsUp,
@@ -18,10 +17,10 @@ import StatCard from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
 import AssetIcon from '../../components/tickets/AssetIcon';
 import TicketTable from '../../components/tickets/TicketTable';
-import { locations } from '../../data/mockData';
+import { locations } from '../../data/referenceData';
 import { resolvedAt } from '../../domain/lifecycle';
 import { childrenOf, locationPath, permittedBuildings } from '../../domain/locations';
-import { greeting, maskPhone, timeAgo, userName } from '../../domain/format';
+import { greeting, timeAgo, userName } from '../../domain/format';
 import type { Ticket } from '../../domain/types';
 import { useCurrentUser } from '../../state/session';
 import { useTicketStore, useVisibleTickets } from '../../state/ticketStore';
@@ -30,7 +29,7 @@ import './LabDashboard.css';
 const howItWorks = [
   { icon: PlusCircle, title: 'Raise', text: 'Photo, asset type, lab and a short description.' },
   { icon: Route, title: 'Auto-routed', text: 'Sent to the Sub-Admin responsible for that lab and asset.' },
-  { icon: Wrench, title: 'Fixed', text: 'You are notified on the portal and WhatsApp.' },
+  { icon: Wrench, title: 'Fixed', text: 'You can follow progress on the portal.' },
   { icon: ThumbsUp, title: 'Confirm', text: 'Confirm the fix, or dispute it to reopen.' },
 ];
 
@@ -47,9 +46,9 @@ export default function LabDashboard() {
   const awaiting = tickets.filter((t) => t.status === 'RESOLVED');
   const buildings = permittedBuildings(user);
 
-  function confirm(t: Ticket) {
-    changeStatus(user, t.id, 'CLOSED');
-    showToast(`Thanks — ${t.id} is now closed`);
+  async function confirm(t: Ticket) {
+    try { await changeStatus(user, t.id, 'CLOSED'); showToast(`Thanks — ${t.id} is now closed`); }
+    catch (error) { showToast(error instanceof Error ? error.message : 'Action failed.'); }
   }
 
   const resolutionNote = (t: Ticket) =>
@@ -61,18 +60,11 @@ export default function LabDashboard() {
         <div className="hero__text">
           <span className="hero__date">
             {user.title} · {user.employeeId}
-            <span className="hero__sample">Sample data</span>
           </span>
           <h2>
             {greeting()}, <span>{user.name}</span>
           </h2>
           <p>Report a campus issue in under a minute — we route it to the right team automatically.</p>
-          {user.phone && (
-            <span className="hero__wa">
-              <MessageCircle size={16} aria-hidden="true" />
-              Or message the GEU WhatsApp bot from your registered number {maskPhone(user.phone)}
-            </span>
-          )}
         </div>
         <div className="hero__actions">
           <Link to="/app/new" className="btn btn-accent hero__cta">
@@ -184,7 +176,7 @@ export default function LabDashboard() {
             <header className="panel__head">
               <div>
                 <h3>How it works</h3>
-                <p>Same steps on the portal and on WhatsApp</p>
+                <p>Track every update on the portal</p>
               </div>
             </header>
             <ol className="how-list">

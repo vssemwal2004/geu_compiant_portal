@@ -26,17 +26,14 @@ export default function LoginPage() {
     if (Object.keys(next).length) return;
 
     setSubmitting(true);
-    // Backend auth (POST /auth/login, HttpOnly cookie) is wired in backend Phase 1.
-    // The server decides the role and the redirect; the UI never lets users pick a role.
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    const signedIn = signIn(id);
-    setSubmitting(false);
-    if (!signedIn) {
-      // Deliberately vague: do not reveal whether the account exists.
-      setErrors({ form: 'Those credentials did not match an active account.' });
-      return;
+    try {
+      const signedIn = await signIn(id, pass);
+      navigate(roleHome[signedIn.role], { replace: true });
+    } catch (error) {
+      setErrors({ form: error instanceof Error ? error.message : 'Sign-in failed.' });
+    } finally {
+      setSubmitting(false);
     }
-    navigate(roleHome[signedIn.role], { replace: true });
   }
 
   function handleSubmit(event: FormEvent) {
@@ -115,9 +112,7 @@ export default function LoginPage() {
             <div className={`field ${errors.password ? 'field--error' : ''}`}>
               <div className="field__label-row">
                 <label htmlFor="password">Password</label>
-                <a href="#forgot" className="field__link">
-                  Forgot password?
-                </a>
+                <span className="field__link">For password help, contact the portal administrator.</span>
               </div>
               <div className="field__control">
                 <Lock size={18} className="field__icon" aria-hidden="true" />

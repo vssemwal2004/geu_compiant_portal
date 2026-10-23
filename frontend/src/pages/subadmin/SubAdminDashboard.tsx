@@ -7,7 +7,7 @@ import { PriorityBadge, StatusBadge } from '../../components/ui/Badges';
 import { useToast } from '../../components/ui/Toast';
 import AssetIcon from '../../components/tickets/AssetIcon';
 import TicketTable from '../../components/tickets/TicketTable';
-import { assetTypes } from '../../data/mockData';
+import { assetTypes } from '../../data/referenceData';
 import { isOverdue, isPendingWork } from '../../domain/lifecycle';
 import { locationPath } from '../../domain/locations';
 import { dueLabel, greeting, timeAgo, userName } from '../../domain/format';
@@ -37,9 +37,9 @@ export default function SubAdminDashboard() {
     t.events.some((e) => e.kind === 'STATUS' && e.to === 'RESOLVED' && e.actorId === user.id && now - new Date(e.at).getTime() < WEEK_MS),
   ).length;
 
-  function start(t: Ticket) {
-    changeStatus(user, t.id, 'IN_PROGRESS');
-    showToast(`${t.id} is now in progress`);
+  async function start(t: Ticket) {
+    try { await changeStatus(user, t.id, 'IN_PROGRESS'); showToast(`${t.id} is now in progress`); }
+    catch (error) { showToast(error instanceof Error ? error.message : 'Action failed.'); }
   }
 
   return (
@@ -48,7 +48,6 @@ export default function SubAdminDashboard() {
         <div className="hero__text">
           <span className="hero__date">
             {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
-            <span className="hero__sample">Sample data</span>
           </span>
           <h2>
             {greeting()}, <span>{user.name}</span>

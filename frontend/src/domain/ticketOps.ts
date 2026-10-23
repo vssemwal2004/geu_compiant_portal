@@ -1,7 +1,7 @@
 // Pure ticket operations. Each returns a new ticket and appends a history event,
 // matching the backend rule that every change is recorded (PDF §11, §14).
 
-import { assetTypes } from '../data/mockData';
+import { assetTypes } from '../data/referenceData';
 import { dueFrom } from './lifecycle';
 import { resolveRoute } from './routing';
 import type {

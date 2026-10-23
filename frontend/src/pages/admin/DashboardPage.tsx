@@ -5,7 +5,7 @@ import StatCard from '../../components/ui/StatCard';
 import BarList from '../../components/ui/BarList';
 import { PriorityBadge } from '../../components/ui/Badges';
 import TicketTable from '../../components/tickets/TicketTable';
-import { assetTypes, locations } from '../../data/mockData';
+import { assetTypes, locations } from '../../data/referenceData';
 import { isActive, isOverdue, isPendingWork } from '../../domain/lifecycle';
 import { ancestorOfType, locationPath } from '../../domain/locations';
 import { greeting } from '../../domain/format';
@@ -60,7 +60,6 @@ export default function DashboardPage() {
         <div className="hero__text">
           <span className="hero__date">
             {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-            <span className="hero__sample">Sample data</span>
           </span>
           <h2>
             {greeting()}, <span>Admin</span>

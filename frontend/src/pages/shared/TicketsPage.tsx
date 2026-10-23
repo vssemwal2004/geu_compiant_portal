@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Search, X } from 'lucide-react';
 import TicketTable from '../../components/tickets/TicketTable';
-import { assetTypes } from '../../data/mockData';
+import { assetTypes } from '../../data/referenceData';
 import { isActive, isOverdue } from '../../domain/lifecycle';
 import { locationPath } from '../../domain/locations';
 import { userName } from '../../domain/format';
@@ -26,7 +26,7 @@ const PRIORITIES: TicketPriority[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 const copy = {
   MAIN_ADMIN: { title: 'All tickets', lead: 'Every ticket across campus.' },
   SUB_ADMIN: { title: 'Assigned tickets', lead: 'Only tickets assigned to you are shown.' },
-  LAB_ASSISTANT: { title: 'My tickets', lead: 'Tickets you raised from the portal or WhatsApp.' },
+  LAB_ASSISTANT: { title: 'My tickets', lead: 'Tickets you raised through the portal.' },
 };
 
 export default function TicketsPage({ unassignedOnly = false }: { unassignedOnly?: boolean }) {

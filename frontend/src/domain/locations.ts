@@ -1,19 +1,17 @@
-import { locations } from '../data/mockData';
+import { locations } from '../data/referenceData';
 import type { Location, LocationType, User } from './types';
 
-const byId = new Map(locations.map((l) => [l.id, l]));
-
 export function getLocation(id: string): Location | undefined {
-  return byId.get(id);
+  return locations.find(l => l.id === id);
 }
 
 /** The location itself followed by its parents up to the campus (most specific first). */
 export function ancestry(id: string): Location[] {
   const chain: Location[] = [];
-  let cur = byId.get(id);
+  let cur = getLocation(id);
   while (cur) {
     chain.push(cur);
-    cur = cur.parentId ? byId.get(cur.parentId) : undefined;
+    cur = cur.parentId ? getLocation(cur.parentId) : undefined;
   }
   return chain;
 }

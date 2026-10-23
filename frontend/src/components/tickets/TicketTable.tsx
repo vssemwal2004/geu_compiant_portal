@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { MapPin, MessageCircle, Monitor } from 'lucide-react';
-import { assetTypes } from '../../data/mockData';
+import { assetTypes } from '../../data/referenceData';
 import { isOverdue } from '../../domain/lifecycle';
 import { locationPath } from '../../domain/locations';
 import { timeAgo, userName } from '../../domain/format';
