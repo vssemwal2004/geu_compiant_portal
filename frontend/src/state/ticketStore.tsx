@@ -12,6 +12,7 @@ interface TicketStore {
   addUpdate: (user: User, ticketId: string, body: string, visibility: Visibility) => Promise<void>;
   reassign: (user: User, ticketId: string, assigneeId: string, reason?: string) => Promise<void>;
   requestEscalation: (user: User, ticketId: string, reason: string) => Promise<void>;
+  addEvidence: (user: User, ticketId: string, file: File) => Promise<void>;
 }
 const Ctx = createContext<TicketStore | null>(null);
 
@@ -23,8 +24,12 @@ export function TicketStoreProvider({ children }: { children: ReactNode }) {
     setTickets(all);
   }, []);
   useEffect(() => {
-    if (user) void refresh().catch(console.error);
-    else setTickets([]);
+    if (!user) { setTickets([]); return; }
+    void refresh().catch(console.error);
+    const timer = window.setInterval(() => { if (!document.hidden) void refresh().catch(console.error); }, 20_000);
+    const onVisible = () => { if (!document.hidden) void refresh().catch(console.error); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); };
   }, [user, refresh]);
   const update = useCallback((ticket: Ticket) => setTickets(all => [ticket, ...all.filter(t => t.id !== ticket.id)].sort((a, b) => b.createdAt.localeCompare(a.createdAt))), []);
   const createTicket = useCallback<TicketStore['createTicket']>(async (_user, input) => {
@@ -44,7 +49,10 @@ export function TicketStoreProvider({ children }: { children: ReactNode }) {
   const requestEscalation = useCallback<TicketStore['requestEscalation']>(async (_user, id, reason) => {
     update(await api<Ticket>(`/tickets/${encodeURIComponent(id)}/escalations`, { method: 'POST', body: JSON.stringify({ reason }) }));
   }, [update]);
-  const value = useMemo(() => ({ tickets, createTicket, changeStatus, addUpdate, reassign, requestEscalation }), [tickets, createTicket, changeStatus, addUpdate, reassign, requestEscalation]);
+  const addEvidence = useCallback<TicketStore['addEvidence']>(async (_user, id, file) => {
+    update(await api<Ticket>(`/uploads/tickets/${encodeURIComponent(id)}/evidence`, { method: 'POST', body: file }));
+  }, [update]);
+  const value = useMemo(() => ({ tickets, createTicket, changeStatus, addUpdate, reassign, requestEscalation, addEvidence }), [tickets, createTicket, changeStatus, addUpdate, reassign, requestEscalation, addEvidence]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 export function useTicketStore() {

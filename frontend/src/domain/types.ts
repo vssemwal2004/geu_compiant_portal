@@ -11,13 +11,17 @@ export type Visibility = 'PUBLIC' | 'INTERNAL';
 export interface User {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   employeeId: string;
   role: Role;
   title: string;
   phone?: string;
   /** Lab Assistants only: locations they may raise tickets for (descendants included). */
   allowedLocationIds?: string[];
+  scopeLocationIds?: string[];
+  defaultLocationId?: string;
+  permissions?: string[];
+  status?: 'ACTIVE' | 'INVITED' | 'DISABLED';
 }
 
 export type LocationType = 'CAMPUS' | 'BUILDING' | 'FLOOR' | 'LAB';
@@ -44,7 +48,7 @@ export interface RoutingRule {
   active: boolean;
 }
 
-export type TicketEventKind = 'CREATED' | 'STATUS' | 'ASSIGNED' | 'MESSAGE' | 'ESCALATION';
+export type TicketEventKind = 'CREATED' | 'STATUS' | 'ASSIGNED' | 'MESSAGE' | 'ESCALATION' | 'EVIDENCE' | 'PRIORITY';
 
 export interface TicketEvent {
   id: string;
@@ -71,5 +75,6 @@ export interface Ticket {
   createdAt: string;
   dueAt: string;
   imageUrl?: string;
+  evidenceUrls?: string[];
   events: TicketEvent[];
 }

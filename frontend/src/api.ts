@@ -2,7 +2,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   const response = await fetch(`/api/v1${path}`, {
     credentials: 'include',
     ...options,
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: { ...(options.body instanceof Blob ? { 'Content-Type': options.body.type } : { 'Content-Type': 'application/json' }), ...options.headers },
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));

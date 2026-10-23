@@ -1,15 +1,18 @@
 import { Armchair, Monitor, Package, Projector, Wifi, Zap, type LucideIcon } from 'lucide-react';
+import { assetTypes } from '../../data/referenceData';
 
 const icons: Record<string, LucideIcon> = {
-  'at-computer': Monitor,
-  'at-projector': Projector,
-  'at-furniture': Armchair,
-  'at-electrical': Zap,
-  'at-network': Wifi,
-  'at-other': Package,
+  COMP: Monitor,
+  PROJ: Projector,
+  FURN: Armchair,
+  ELEC: Zap,
+  NET: Wifi,
+  OTHER: Package,
 };
 
 export default function AssetIcon({ id, size = 18 }: { id: string; size?: number }) {
-  const Icon = icons[id] ?? Package;
+  const asset = assetTypes.find(a => a.id === id);
+  const code = asset?.code.toUpperCase() || '';
+  const Icon = icons[code] || (asset?.name.toLowerCase().includes('computer') ? Monitor : asset?.name.toLowerCase().includes('projector') ? Projector : Package);
   return <Icon size={size} strokeWidth={1.9} aria-hidden="true" />;
 }

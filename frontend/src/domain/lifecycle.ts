@@ -51,7 +51,7 @@ export function availableTransitions(t: Ticket, user: User, now = Date.now()): T
   if (staffMayWork) {
     if (t.status === 'OPEN') options.push({ to: 'IN_PROGRESS', label: 'Accept & start work', tone: 'primary' });
     if (t.status === 'REOPENED') options.push({ to: 'IN_PROGRESS', label: 'Resume work', tone: 'primary' });
-    if (t.status === 'IN_PROGRESS')
+    if (t.status === 'IN_PROGRESS' && (t.evidenceUrls?.length ?? 0) > 0)
       options.push({ to: 'RESOLVED', label: 'Mark as resolved', tone: 'accent', noteLabel: 'Resolution note' });
   }
 
@@ -81,7 +81,7 @@ export function canView(user: User, t: Ticket) {
 export const canAssign = (user: User) => user.role === 'MAIN_ADMIN';
 
 export const canEscalate = (user: User, t: Ticket) =>
-  user.role === 'SUB_ADMIN' && t.assignedTo === user.id && isActive(t);
+  user.role === 'SUB_ADMIN' && user.permissions?.includes('ESCALATE_ASSIGNED') && t.assignedTo === user.id && isActive(t);
 
 export const canPostUpdate = (user: User, t: Ticket) => canView(user, t) && isActive(t);
 

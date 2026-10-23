@@ -1,4 +1,4 @@
-import { ArrowRightLeft, CircleDot, EyeOff, Flag, MessageSquareText, Sparkles } from 'lucide-react';
+import { ArrowRightLeft, Camera, CircleDot, EyeOff, Flag, MessageSquareText, Sparkles } from 'lucide-react';
 import { formatDate, timeAgo, userName } from '../../domain/format';
 import type { TicketEvent } from '../../domain/types';
 import { statusMeta } from '../ui/Badges';
@@ -19,6 +19,10 @@ function describe(e: TicketEvent): string {
       return `${userName(e.actorId)} posted an update`;
     case 'ESCALATION':
       return `${userName(e.actorId)} requested Main Admin intervention`;
+    case 'EVIDENCE':
+      return `${userName(e.actorId)} uploaded resolution evidence`;
+    case 'PRIORITY':
+      return `${userName(e.actorId)} changed the priority`;
   }
 }
 
@@ -28,6 +32,8 @@ const icons = {
   STATUS: CircleDot,
   MESSAGE: MessageSquareText,
   ESCALATION: Flag,
+  EVIDENCE: Camera,
+  PRIORITY: Flag,
 };
 
 /** Ticket history, newest first. Callers filter out internal events for Lab Assistants. */

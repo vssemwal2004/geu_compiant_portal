@@ -41,6 +41,10 @@ function describe(e: TicketEvent, t: Ticket, user: User): { title: string; text:
       return { title: `Update on ${t.id}`, text: `${userName(e.actorId)}: ${e.text ?? ''}` };
     case 'ESCALATION':
       return user.role === 'MAIN_ADMIN' ? { title: `Escalation on ${t.id}`, text: e.text ?? '' } : null;
+    case 'EVIDENCE':
+      return { title: `Evidence added to ${t.id}`, text: `${userName(e.actorId)} uploaded a resolution photo` };
+    case 'PRIORITY':
+      return { title: `Priority changed on ${t.id}`, text: e.text ?? '' };
   }
 }
 

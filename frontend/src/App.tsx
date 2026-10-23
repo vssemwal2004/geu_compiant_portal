@@ -3,6 +3,13 @@ import LoginPage from './pages/LoginPage';
 import AppLayout from './layouts/AppLayout';
 import DashboardPage from './pages/admin/DashboardPage';
 import UsersPage from './pages/admin/UsersPage';
+import RolesPage from './pages/admin/RolesPage';
+import LocationsPage from './pages/admin/LocationsPage';
+import AssetsPage from './pages/admin/AssetsPage';
+import RoutingRulesPage from './pages/admin/RoutingRulesPage';
+import ReportsPage from './pages/admin/ReportsPage';
+import AuditLogsPage from './pages/admin/AuditLogsPage';
+import EscalationsPage from './pages/admin/EscalationsPage';
 import SubAdminDashboard from './pages/subadmin/SubAdminDashboard';
 import LabDashboard from './pages/lab/LabDashboard';
 import CreateTicketPage from './pages/shared/CreateTicketPage';
@@ -40,6 +47,13 @@ export default function App() {
         <Route path="tickets/:id" element={<TicketDetailPage />} />
         <Route path="new" element={<CreateTicketPage />} />
         <Route path="users" element={<UsersPage />} />
+        <Route path="roles" element={<RolesPage />} />
+        <Route path="locations" element={<LocationsPage />} />
+        <Route path="asset-types" element={<AssetsPage />} />
+        <Route path="routing-rules" element={<RoutingRulesPage />} />
+        <Route path="escalations" element={<EscalationsPage />} />
+        <Route path="reports" element={<ReportsPage />} />
+        <Route path="audit-log" element={<AuditLogsPage />} />
         {placeholderRoutes('MAIN_ADMIN', '/admin')}
       </Route>
 

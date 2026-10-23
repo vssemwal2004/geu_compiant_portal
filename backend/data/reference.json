@@ -1,0 +1,180 @@
+{
+  "locations": [
+    {
+      "id": "c-main",
+      "parentId": null,
+      "type": "CAMPUS",
+      "name": "Main Campus"
+    },
+    {
+      "id": "b-gr",
+      "parentId": "c-main",
+      "type": "BUILDING",
+      "name": "GR Block"
+    },
+    {
+      "id": "f-gr-1",
+      "parentId": "b-gr",
+      "type": "FLOOR",
+      "name": "Floor 1"
+    },
+    {
+      "id": "l-gr-104",
+      "parentId": "f-gr-1",
+      "type": "LAB",
+      "name": "Room 104"
+    },
+    {
+      "id": "f-gr-2",
+      "parentId": "b-gr",
+      "type": "FLOOR",
+      "name": "Floor 2"
+    },
+    {
+      "id": "l-gr-205",
+      "parentId": "f-gr-2",
+      "type": "LAB",
+      "name": "Lab 205"
+    },
+    {
+      "id": "l-gr-206",
+      "parentId": "f-gr-2",
+      "type": "LAB",
+      "name": "Lab 206"
+    },
+    {
+      "id": "f-gr-3",
+      "parentId": "b-gr",
+      "type": "FLOOR",
+      "name": "Floor 3"
+    },
+    {
+      "id": "l-gr-301",
+      "parentId": "f-gr-3",
+      "type": "LAB",
+      "name": "Lab 301"
+    },
+    {
+      "id": "b-gehu",
+      "parentId": "c-main",
+      "type": "BUILDING",
+      "name": "GEHU Block"
+    },
+    {
+      "id": "f-gehu-1",
+      "parentId": "b-gehu",
+      "type": "FLOOR",
+      "name": "Floor 1"
+    },
+    {
+      "id": "l-gehu-110",
+      "parentId": "f-gehu-1",
+      "type": "LAB",
+      "name": "Lab 110"
+    },
+    {
+      "id": "f-gehu-2",
+      "parentId": "b-gehu",
+      "type": "FLOOR",
+      "name": "Floor 2"
+    },
+    {
+      "id": "l-gehu-214",
+      "parentId": "f-gehu-2",
+      "type": "LAB",
+      "name": "Lab 214"
+    },
+    {
+      "id": "b-hostel-a",
+      "parentId": "c-main",
+      "type": "BUILDING",
+      "name": "Hostel A"
+    },
+    {
+      "id": "f-ha-3",
+      "parentId": "b-hostel-a",
+      "type": "FLOOR",
+      "name": "Floor 3"
+    },
+    {
+      "id": "l-ha-312",
+      "parentId": "f-ha-3",
+      "type": "LAB",
+      "name": "Room 312"
+    },
+    {
+      "id": "b-lib",
+      "parentId": "c-main",
+      "type": "BUILDING",
+      "name": "Library"
+    },
+    {
+      "id": "f-lib-g",
+      "parentId": "b-lib",
+      "type": "FLOOR",
+      "name": "Ground Floor"
+    },
+    {
+      "id": "l-lib-read",
+      "parentId": "f-lib-g",
+      "type": "LAB",
+      "name": "Reading Hall"
+    },
+    {
+      "id": "b-admin",
+      "parentId": "c-main",
+      "type": "BUILDING",
+      "name": "Admin Block"
+    },
+    {
+      "id": "f-adm-1",
+      "parentId": "b-admin",
+      "type": "FLOOR",
+      "name": "Floor 1"
+    },
+    {
+      "id": "l-adm-corr",
+      "parentId": "f-adm-1",
+      "type": "LAB",
+      "name": "Corridor"
+    }
+  ],
+  "assetTypes": [
+    {
+      "id": "at-computer",
+      "name": "Computer",
+      "code": "COMP",
+      "defaultPriority": "MEDIUM"
+    },
+    {
+      "id": "at-projector",
+      "name": "Projector",
+      "code": "PROJ",
+      "defaultPriority": "MEDIUM"
+    },
+    {
+      "id": "at-furniture",
+      "name": "Furniture",
+      "code": "FURN",
+      "defaultPriority": "LOW"
+    },
+    {
+      "id": "at-electrical",
+      "name": "Electrical",
+      "code": "ELEC",
+      "defaultPriority": "HIGH"
+    },
+    {
+      "id": "at-network",
+      "name": "Networking",
+      "code": "NET",
+      "defaultPriority": "MEDIUM"
+    },
+    {
+      "id": "at-other",
+      "name": "Other",
+      "code": "OTH",
+      "defaultPriority": "LOW"
+    }
+  ]
+}

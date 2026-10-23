@@ -13,6 +13,7 @@ import {
   SearchX,
   Send,
   UserCheck,
+  Camera,
 } from 'lucide-react';
 import AssetIcon from '../../components/tickets/AssetIcon';
 import StatusStepper from '../../components/tickets/StatusStepper';
@@ -162,6 +163,7 @@ function Detail({ ticket: t, user, home }: { ticket: Ticket; user: User; home: s
         </div>
 
         <aside className="ticket__side">
+          <EvidencePanel ticket={t} user={user} onDone={showToast} />
           <Actions ticket={t} user={user} onDone={showToast} />
           {canAssign(user) && <AssignPanel ticket={t} user={user} onDone={showToast} />}
           {canEscalate(user, t) && <EscalatePanel ticket={t} user={user} onDone={showToast} />}
@@ -170,6 +172,27 @@ function Detail({ ticket: t, user, home }: { ticket: Ticket; user: User; home: s
       {toast}
     </div>
   );
+}
+
+function EvidencePanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User; onDone: (m: string) => void }) {
+  const { addEvidence } = useTicketStore();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const canUpload = user.role !== 'LAB_ASSISTANT' && ['OPEN', 'IN_PROGRESS', 'REOPENED'].includes(t.status);
+  async function upload(file?: File) {
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) { setError('Use a JPG, PNG or WebP image up to 5 MB.'); return; }
+    setBusy(true); setError('');
+    try { await addEvidence(user, t.id, file); onDone('Resolution evidence uploaded'); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'Upload failed.'); }
+    finally { setBusy(false); }
+  }
+  return <section className="panel glass rise-in" style={{ padding: 22 }}>
+    <header className="panel__head"><div><h3>Resolution evidence</h3><p>{canUpload ? 'Upload a photo before marking this ticket resolved.' : 'Photos added by the resolver.'}</p></div></header>
+    {t.evidenceUrls?.length ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{t.evidenceUrls.map((url, index) => <a key={url} href={url} target="_blank" rel="noreferrer"><img src={url} alt={`Resolution evidence ${index + 1}`} style={{ width: 86, height: 70, objectFit: 'cover', borderRadius: 8 }} /></a>)}</div> : <p className="form-hint">No evidence uploaded yet.</p>}
+    {canUpload && <label className="btn btn-ghost" style={{ marginTop: 12, display: 'inline-flex', cursor: busy ? 'wait' : 'pointer' }}><Camera size={16} /> {busy ? 'Uploading…' : 'Upload evidence'}<input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={busy} onChange={e => { void upload(e.target.files?.[0]); e.target.value = ''; }} /></label>}
+    {error && <p className="form-error" role="alert">{error}</p>}
+  </section>;
 }
 
 /* ---------- Status actions ---------- */

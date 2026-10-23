@@ -44,16 +44,18 @@ export const navByRole: Record<Role, NavGroup[]> = {
       title: 'Configuration',
       items: [
         { label: 'Users', path: '/admin/users', icon: Users },
-        { label: 'Locations', path: '/admin/locations', icon: MapPin, placeholder: true },
-        { label: 'Asset Types', path: '/admin/asset-types', icon: Boxes, placeholder: true },
-        { label: 'Routing Rules', path: '/admin/routing-rules', icon: GitBranch, placeholder: true },
+        { label: 'Roles', path: '/admin/roles', icon: UserRound },
+        { label: 'Locations', path: '/admin/locations', icon: MapPin },
+        { label: 'Asset Types', path: '/admin/asset-types', icon: Boxes },
+        { label: 'Routing Rules', path: '/admin/routing-rules', icon: GitBranch },
       ],
     },
     {
       title: 'Insights',
       items: [
-        { label: 'Reports', path: '/admin/reports', icon: BarChart3, placeholder: true },
-        { label: 'Audit Log', path: '/admin/audit-log', icon: History, placeholder: true },
+        { label: 'Escalations', path: '/admin/escalations', icon: Inbox },
+        { label: 'Reports', path: '/admin/reports', icon: BarChart3 },
+        { label: 'Audit Log', path: '/admin/audit-log', icon: History },
         { label: 'Settings', path: '/admin/settings', icon: Settings, placeholder: true },
       ],
     },
