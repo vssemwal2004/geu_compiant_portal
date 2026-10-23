@@ -1,0 +1,102 @@
+/*
+ * GEU Complaint Portal — design tokens.
+ * Every colour, weight, radius and timing used by the UI comes from here,
+ * so the theme can be adjusted in one place.
+ */
+:root {
+  /* Brand */
+  --navy-900: #00005c; /* primary brand blue */
+  --navy-800: #0b0b72;
+  --navy-700: #1b1b88;
+  --navy-500: #4747a8;
+  --navy-200: #c9c9e6;
+  --navy-100: #e7e7f4;
+  --navy-50: #f3f3fa;
+
+  --gold-500: #ffcc00; /* accent yellow — fills/highlights only, never body text on light bg */
+  --gold-600: #e6b800;
+  --gold-100: #fff5cc;
+  --gold-50: #fffbe6;
+
+  /* Surfaces & ink */
+  --bg: #fffefa; /* page background */
+  --surface: #ffffff;
+  --ink-900: #0e0f33; /* primary text */
+  --ink-700: #33355a;
+  --ink-500: #5d5f7e; /* secondary text */
+  --ink-400: #85879f; /* muted text, placeholders */
+  --line: rgba(0, 0, 92, 0.09);
+  --line-strong: rgba(0, 0, 92, 0.16);
+
+  /* Ticket status (always shown with icon + label, never colour alone) */
+  --st-open: #1d4ed8;
+  --st-open-bg: #e6edff;
+  --st-progress: #a15c00;
+  --st-progress-bg: #fff3d6;
+  --st-resolved: #13795b;
+  --st-resolved-bg: #dff5ec;
+  --st-reopened: #b4300d;
+  --st-reopened-bg: #ffe8df;
+  --st-closed: #4b5068;
+  --st-closed-bg: #eceef4;
+
+  /* Priority */
+  --pr-low: #4b5068;
+  --pr-medium: #1b1b88;
+  --pr-high: #a15c00;
+  --pr-critical: #b42318;
+  --pr-critical-bg: #fde8e7;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.64);
+  --glass-bg-strong: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-blur: 18px;
+  --glass-dark-bg: rgba(255, 255, 255, 0.08);
+  --glass-dark-border: rgba(255, 255, 255, 0.16);
+
+  /* Elevation (navy-tinted shadows read softer than grey) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 92, 0.06), 0 1px 3px rgba(0, 0, 92, 0.05);
+  --shadow-md: 0 6px 18px -6px rgba(0, 0, 92, 0.14), 0 2px 6px rgba(0, 0, 92, 0.05);
+  --shadow-lg: 0 24px 48px -16px rgba(0, 0, 92, 0.22), 0 6px 14px rgba(0, 0, 92, 0.06);
+
+  /* Typography — one family, a clear weight scale */
+  --font-sans: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --fw-thin: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-heavy: 800;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.625rem;
+  --fs-2xl: 2.125rem;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Layout */
+  --sidebar-rail: 78px;
+  --sidebar-full: 268px;
+  --header-h: 72px;
+  --gutter: clamp(16px, 3vw, 32px);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 160ms;
+  --dur-base: 280ms;
+  --dur-sidebar: 800ms; /* requested: 0.8s slide in/out */
+
+  /* Focus */
+  --focus-ring: 0 0 0 3px rgba(255, 204, 0, 0.65), 0 0 0 5px rgba(0, 0, 92, 0.9);
+}

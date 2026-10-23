@@ -1,0 +1,128 @@
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepper__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+/* connector to the previous step */
+.stepper__step + .stepper__step::before {
+  content: '';
+  position: absolute;
+  top: 11px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line-strong);
+}
+
+.stepper__step.is-done::before,
+.stepper__step.is-current::before {
+  background: var(--navy-900);
+}
+
+.stepper__dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--line-strong);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--gold-500);
+  transition: all var(--dur-base) var(--ease-out);
+}
+
+.stepper__step.is-done .stepper__dot {
+  border-color: var(--navy-900);
+  background: var(--navy-900);
+}
+
+.stepper__step.is-current .stepper__dot {
+  border-color: var(--navy-900);
+  background: var(--gold-500);
+  box-shadow: 0 0 0 5px rgba(255, 204, 0, 0.3);
+  animation: pulse 2.4s var(--ease-out) infinite;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 0 9px rgba(255, 204, 0, 0.08);
+  }
+}
+
+.stepper__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-500);
+}
+
+.stepper__step.is-current .stepper__label {
+  font-weight: var(--fw-bold);
+  color: var(--navy-900);
+}
+
+.stepper__label em {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.6875rem;
+  font-style: normal;
+  font-weight: var(--fw-bold);
+  color: var(--st-reopened);
+}
+
+/* Compact variant for ticket cards */
+.stepper--compact {
+  margin: 12px 0 2px;
+}
+
+.stepper--compact .stepper__dot {
+  width: 16px;
+  height: 16px;
+}
+
+.stepper--compact .stepper__dot svg {
+  width: 9px;
+  height: 9px;
+}
+
+.stepper--compact .stepper__step + .stepper__step::before {
+  top: 7px;
+}
+
+.stepper--compact .stepper__step.is-current .stepper__dot {
+  box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.3);
+  animation: none;
+}
+
+.stepper--compact .stepper__label {
+  font-size: 0.6875rem;
+}
+
+.stepper-cancelled {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--st-closed-bg);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--st-closed);
+}

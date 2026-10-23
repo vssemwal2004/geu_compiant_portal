@@ -1,0 +1,738 @@
+/* Sizes inside the scene scale with its own width (container query units). */
+.hd {
+  --rx: 0deg;
+  --ry: 0deg;
+  width: 100%;
+  container-type: inline-size;
+  perspective: 1400px;
+}
+
+.hd__stage {
+  position: relative;
+  aspect-ratio: 600 / 480;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 900ms var(--ease-out);
+}
+
+.hd__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The whole scene is tappable (confetti cheer) */
+.hd__stage {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ---------- Life: blinking, clock, call, gestures (9 s story loop) ---------- */
+.hd-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hd-blink 4.8s infinite;
+}
+
+.hd-eyes--late {
+  animation-delay: -2.1s;
+}
+
+@keyframes hd-blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+.hd-clock__min,
+.hd-clock__hour {
+  transform-origin: 424px 150px;
+  animation: hd-spin 10s linear infinite;
+}
+
+.hd-clock__hour {
+  animation-duration: 120s;
+}
+
+/* Sound waves while the staff member is on a call (route stage of the loop) */
+.hd-voice path {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 100% 50%;
+  animation: hd-voice 9s ease-out infinite;
+}
+
+.hd-voice path:nth-child(2) {
+  animation-delay: 0.25s;
+}
+
+@keyframes hd-voice {
+  0%,
+  16%,
+  48%,
+  100% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  20%,
+  28%,
+  36%,
+  44% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  24%,
+  32%,
+  40% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+/* Staff raises a hand as the ticket is resolved (~75% of the loop) */
+.hd-staff-arm {
+  transform-origin: 392px 262px;
+  animation: hd-raise 9s var(--ease-in-out) infinite;
+}
+
+@keyframes hd-raise {
+  0%,
+  66%,
+  92%,
+  100% {
+    transform: rotate(0);
+  }
+  71% {
+    transform: rotate(-135deg);
+  }
+  75% {
+    transform: rotate(-118deg);
+  }
+  79% {
+    transform: rotate(-138deg);
+  }
+  83% {
+    transform: rotate(-120deg);
+  }
+  87% {
+    transform: rotate(-130deg);
+  }
+}
+
+/* Lab assistant waves "thanks" right after */
+.hd-wave-arm {
+  transform-origin: 100px 262px;
+  animation: hd-wave 9s var(--ease-in-out) infinite;
+}
+
+@keyframes hd-wave {
+  0%,
+  70%,
+  95%,
+  100% {
+    transform: rotate(0);
+  }
+  75% {
+    transform: rotate(150deg);
+  }
+  78% {
+    transform: rotate(128deg);
+  }
+  81% {
+    transform: rotate(152deg);
+  }
+  84% {
+    transform: rotate(128deg);
+  }
+  87% {
+    transform: rotate(148deg);
+  }
+}
+
+.hd-printer__led {
+  animation: hd-led 1.1s steps(1) infinite;
+}
+
+@keyframes hd-led {
+  50% {
+    fill: #00005c;
+  }
+}
+
+.hd-shine {
+  animation: hd-shine 6s var(--ease-in-out) infinite;
+}
+
+@keyframes hd-shine {
+  0%,
+  100% {
+    stroke-opacity: 0.25;
+  }
+  50% {
+    stroke-opacity: 0.85;
+  }
+}
+
+/* ---------- Plant: independent leaves + an occasional falling leaf ---------- */
+.hd-leaf {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: hd-leaf 3.4s var(--ease-in-out) var(--d, 0s) infinite;
+}
+
+@keyframes hd-leaf {
+  0%,
+  100% {
+    transform: rotate(calc(var(--a, 6deg) * -0.6));
+  }
+  50% {
+    transform: rotate(var(--a, 6deg));
+  }
+}
+
+.hd-leaf--top {
+  animation-name: hd-leaf-top;
+}
+
+@keyframes hd-leaf-top {
+  0%,
+  100% {
+    transform: rotate(-4deg) scale(1);
+  }
+  50% {
+    transform: rotate(5deg) scale(1.06);
+  }
+}
+
+/* Hover the plant: it rustles */
+.hd-plant:hover .hd-leaf {
+  animation-duration: 0.55s;
+}
+
+.hd-plant:hover .hd-plant__leaves {
+  animation-duration: 1.4s;
+}
+
+.hd-falling-leaf {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hd-fall 12s ease-in-out infinite;
+}
+
+@keyframes hd-fall {
+  0%,
+  58% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0);
+  }
+  61% {
+    opacity: 1;
+    transform: translate(2px, 6px) rotate(20deg);
+  }
+  70% {
+    transform: translate(12px, 34px) rotate(70deg);
+  }
+  80% {
+    transform: translate(-4px, 72px) rotate(150deg);
+  }
+  90% {
+    opacity: 1;
+    transform: translate(12px, 112px) rotate(230deg);
+  }
+  96%,
+  100% {
+    opacity: 0;
+    transform: translate(14px, 118px) rotate(250deg);
+  }
+}
+
+/* ---------- Tap / click celebration ---------- */
+.hd-confetti rect {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hd-confetti 1.35s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes hd-confetti {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0) scale(0.3);
+  }
+  70% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1);
+  }
+}
+
+.hd.is-cheering .hd-staff-arm {
+  animation: hd-raise-now 1.6s var(--ease-in-out);
+}
+
+.hd.is-cheering .hd-wave-arm {
+  animation: hd-wave-now 1.6s var(--ease-in-out);
+}
+
+.hd.is-cheering .hd-card--done {
+  animation: hd-pop 1.6s var(--ease-out) both;
+}
+
+@keyframes hd-raise-now {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  18% {
+    transform: rotate(-135deg);
+  }
+  34% {
+    transform: rotate(-116deg);
+  }
+  50% {
+    transform: rotate(-138deg);
+  }
+  66% {
+    transform: rotate(-120deg);
+  }
+  82% {
+    transform: rotate(-130deg);
+  }
+}
+
+@keyframes hd-wave-now {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  18% {
+    transform: rotate(150deg);
+  }
+  34% {
+    transform: rotate(126deg);
+  }
+  50% {
+    transform: rotate(152deg);
+  }
+  66% {
+    transform: rotate(126deg);
+  }
+  82% {
+    transform: rotate(148deg);
+  }
+}
+
+@keyframes hd-pop {
+  0% {
+    opacity: 0.72;
+    transform: translateZ(30px) scale(0.96);
+  }
+  25% {
+    opacity: 1;
+    transform: translateZ(70px) scale(1.1);
+    box-shadow:
+      0 0 0 4px rgba(255, 204, 0, 0.55),
+      0 20px 40px -14px rgba(0, 0, 92, 0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: translateZ(60px) scale(1);
+  }
+}
+
+/* ---------- Ambient motion ---------- */
+.hd-orbit {
+  transform-origin: 320px 250px;
+  animation: hd-spin 60s linear infinite;
+}
+
+@keyframes hd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hd-spark > g {
+  animation: hd-twinkle 3.6s var(--ease-in-out) infinite;
+}
+
+.hd-spark > g:nth-child(2) {
+  animation-delay: -1.2s;
+}
+
+.hd-spark > g:nth-child(3) {
+  animation-delay: -2.4s;
+}
+
+@keyframes hd-twinkle {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.75) rotate(25deg);
+  }
+}
+
+/* Staff: typing hands and a slight head movement */
+.hd-typing {
+  animation: hd-type 0.42s ease-in-out infinite alternate;
+}
+
+.hd-typing--alt {
+  animation-delay: -0.21s;
+}
+
+@keyframes hd-type {
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+.hd-staff__head {
+  transform-origin: 360px 212px;
+  animation: hd-nod 5s var(--ease-in-out) infinite;
+}
+
+@keyframes hd-nod {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  40% {
+    transform: rotate(-3deg);
+  }
+  70% {
+    transform: rotate(2deg);
+  }
+}
+
+/* Visitor: phone glow, typing bubble, gentle sway */
+.hd-visitor__head {
+  transform-origin: 122px 226px;
+  animation: hd-nod 6s var(--ease-in-out) -2s infinite;
+}
+
+.hd-phone-arm {
+  transform-origin: 142px 258px;
+  animation: hd-lift 4.5s var(--ease-in-out) infinite;
+}
+
+@keyframes hd-lift {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  12% {
+    transform: rotate(-4deg);
+  }
+  24% {
+    transform: rotate(0);
+  }
+}
+
+.hd-phone-screen {
+  animation: hd-screen 4.5s steps(1) infinite;
+}
+
+@keyframes hd-screen {
+  0%,
+  100% {
+    fill: #ffcc00;
+  }
+  10% {
+    fill: #ffffff;
+  }
+  20% {
+    fill: #ffcc00;
+  }
+}
+
+.hd-bubble {
+  animation: hd-float 3s var(--ease-in-out) infinite;
+}
+
+.hd-dot {
+  animation: hd-dot 1.2s ease-in-out infinite;
+}
+
+.hd-dot:nth-of-type(2) {
+  animation-delay: 0.15s;
+}
+
+.hd-dot:nth-of-type(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes hd-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+@keyframes hd-float {
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Route: dashes march toward the desk */
+.hd-route {
+  opacity: 0.55;
+  animation: hd-march 1.2s linear infinite;
+}
+
+@keyframes hd-march {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+/* When the flying ticket lands (≈55% of 4.5s): laptop glows, a slip prints */
+.hd-laptop__glow {
+  transform-origin: 292px 264px;
+  animation: hd-glow 4.5s var(--ease-out) infinite;
+}
+
+@keyframes hd-glow {
+  0%,
+  50% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.6);
+  }
+  85%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+.hd-slip {
+  animation: hd-print 4.5s var(--ease-out) infinite;
+}
+
+@keyframes hd-print {
+  0%,
+  56% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  66% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+.hd-plant__leaves {
+  transform-origin: 532px 392px;
+  animation: hd-sway 5.5s var(--ease-in-out) infinite;
+}
+
+@keyframes hd-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+
+/* ---------- Glass status cards ---------- */
+.hd-card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.65em 0.9em;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 1em;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 10px 28px -12px rgba(0, 0, 92, 0.28);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  font-size: clamp(9px, 2.1cqw, 13px);
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--ink-900);
+  animation:
+    hd-focus 9s var(--ease-out) infinite,
+    hd-bob 5s var(--ease-in-out) infinite;
+}
+
+.hd-card strong {
+  display: block;
+  font-weight: var(--fw-bold);
+  color: var(--navy-900);
+}
+
+.hd-card small {
+  display: block;
+  font-size: 0.86em;
+  font-weight: var(--fw-regular);
+  color: var(--ink-500);
+}
+
+.hd-card em {
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  background: var(--gold-100);
+  font-size: 0.8em;
+  font-style: normal;
+  font-weight: var(--fw-bold);
+  color: var(--navy-900);
+}
+
+.hd-card__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.3em;
+  height: 2.3em;
+  border-radius: 0.7em;
+  background: var(--navy-900);
+  color: var(--gold-500);
+}
+
+.hd-card__icon svg {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.hd-card__icon--ok {
+  background: var(--st-resolved-bg);
+  color: var(--st-resolved);
+}
+
+/* Positions are relative to the 600×480 illustration */
+.hd-card--new {
+  top: 22%;
+  left: -1%;
+}
+
+.hd-card--route {
+  top: 6%;
+  left: 33%;
+  animation-delay: -6.75s, -1.2s;
+}
+
+.hd-card--queue {
+  top: 14%;
+  right: -1%;
+  display: grid;
+  gap: 0.5em;
+  width: 24%;
+  animation-delay: -4.5s, -2.4s;
+}
+
+.hd-card--done {
+  top: 38%;
+  right: -2%;
+  animation-delay: -2.25s, -3.6s;
+}
+
+.hd-bars {
+  display: grid;
+  gap: 0.35em;
+}
+
+.hd-bars i {
+  display: block;
+  height: 0.45em;
+  border-radius: 1em;
+  background: linear-gradient(90deg, var(--navy-700), var(--navy-900));
+  animation: hd-bar 3.2s var(--ease-in-out) infinite alternate;
+}
+
+.hd-bars i:nth-child(2) {
+  background: var(--gold-500);
+  animation-delay: -1.1s;
+}
+
+.hd-bars i:nth-child(3) {
+  background: #9fb3ff;
+  animation-delay: -2.2s;
+}
+
+@keyframes hd-bar {
+  from {
+    width: 28%;
+  }
+  to {
+    width: var(--w);
+  }
+}
+
+/* Each card takes the spotlight for a quarter of the cycle */
+@keyframes hd-focus {
+  0%,
+  30%,
+  100% {
+    opacity: 0.72;
+    transform: translateZ(30px) scale(0.96);
+    box-shadow: 0 10px 28px -12px rgba(0, 0, 92, 0.28);
+  }
+  6% {
+    opacity: 1;
+    transform: translateZ(60px) scale(1.04);
+    box-shadow:
+      0 0 0 3px rgba(255, 204, 0, 0.45),
+      0 18px 36px -14px rgba(0, 0, 92, 0.38);
+  }
+  22% {
+    opacity: 1;
+    transform: translateZ(60px) scale(1);
+    box-shadow:
+      0 0 0 3px rgba(255, 204, 0, 0.3),
+      0 18px 36px -14px rgba(0, 0, 92, 0.32);
+  }
+}
+
+@keyframes hd-bob {
+  50% {
+    translate: 0 -6px;
+  }
+}
+
+/* Narrow scenes (phones): keep the story readable with fewer cards */
+@container (max-width: 440px) {
+  .hd-card--queue,
+  .hd-card--route {
+    display: none;
+  }
+
+  .hd-card {
+    font-size: 10px;
+  }
+
+  /* Move "Resolved" to the open sky area so it never covers the staff member */
+  .hd-card--done {
+    top: 2%;
+    right: 0;
+  }
+}

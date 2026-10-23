@@ -1,0 +1,283 @@
+.ticket__code {
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticket__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ticket__source {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.8);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-500);
+}
+
+.ticket__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.ticket__main,
+.ticket__side {
+  display: grid;
+  gap: 22px;
+}
+
+.ticket__side {
+  position: sticky;
+  top: calc(var(--header-h) + 20px);
+}
+
+/* ---------- Issue ---------- */
+.issue {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 20px;
+}
+
+.issue__photo {
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  background: var(--navy-50);
+}
+
+.issue__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.issue__nophoto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+  padding: 12px;
+  text-align: center;
+  color: var(--navy-500);
+}
+
+.issue__nophoto small {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+}
+
+.issue__nophoto-note {
+  font-weight: var(--fw-regular) !important;
+  color: var(--ink-400);
+}
+
+.issue__asset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--navy-50);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  color: var(--navy-900);
+}
+
+.issue__desc {
+  margin-top: 12px;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  line-height: 1.5;
+  color: var(--ink-900);
+}
+
+.issue__loc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: var(--fs-sm);
+  color: var(--ink-500);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.facts dt {
+  font-size: 0.6875rem;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-400);
+}
+
+.facts dd {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 4px 0 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-900);
+}
+
+.facts__late {
+  color: var(--pr-critical) !important;
+}
+
+/* ---------- Actions ---------- */
+.actions__list,
+.stack {
+  display: grid;
+  gap: 10px;
+}
+
+.actions__list .btn,
+.stack .btn,
+.stack__full {
+  width: 100%;
+  height: 46px;
+}
+
+.actions__row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.actions__note .textarea {
+  min-height: 90px;
+}
+
+/* ---------- Composer ---------- */
+.composer {
+  margin-bottom: 20px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.85);
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+
+.composer--internal {
+  border-color: rgba(255, 204, 0, 0.7);
+  background: var(--gold-50);
+}
+
+.composer__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.composer__tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-500);
+}
+
+.composer__tabs button.is-active {
+  border-color: var(--navy-900);
+  background: var(--navy-900);
+  color: #fff;
+}
+
+.composer .textarea {
+  min-height: 70px;
+  border-color: var(--line);
+}
+
+.composer__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.composer__foot small {
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+}
+
+.composer__foot .btn {
+  height: 38px;
+}
+
+/* ---------- Not found ---------- */
+.notfound {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--navy-700);
+}
+
+.notfound h2 {
+  font-weight: var(--fw-heavy);
+  color: var(--navy-900);
+}
+
+.notfound p {
+  color: var(--ink-500);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1099px) {
+  .ticket__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Actions first on small screens: it is what the user came to do */
+  .ticket__side {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .issue {
+    grid-template-columns: 1fr;
+  }
+
+  .issue__photo {
+    aspect-ratio: 16 / 10;
+  }
+
+  .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,120 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.filters__search {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 220px;
+}
+
+.filters__search svg {
+  position: absolute;
+  left: 14px;
+  color: var(--ink-400);
+  pointer-events: none;
+}
+
+.filters__search .input {
+  padding-left: 42px;
+}
+
+.filters__select {
+  width: auto;
+  min-width: 170px;
+}
+
+.status-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 0 -20px 6px;
+  padding: 0 20px 12px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+}
+
+.status-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.status-tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.8);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-500);
+  transition: all var(--dur-base) var(--ease-out);
+}
+
+.status-tab span {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--navy-50);
+  font-weight: var(--fw-bold);
+  color: var(--navy-900);
+}
+
+.status-tab:hover {
+  border-color: var(--line-strong);
+  color: var(--navy-900);
+}
+
+.status-tab.is-active {
+  border-color: var(--navy-900);
+  background: var(--navy-900);
+  color: #fff;
+}
+
+.status-tab.is-active span {
+  background: var(--gold-500);
+}
+
+.status-tab--late.is-active {
+  border-color: var(--pr-critical);
+  background: var(--pr-critical);
+}
+
+.filters__summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 4px;
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+}
+
+.filters__summary button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--navy-800);
+}
+
+@media (max-width: 767px) {
+  .status-tabs {
+    margin: 0 -16px 6px;
+    padding: 0 16px 12px;
+  }
+
+  .filters__select {
+    flex: 1;
+  }
+}
