@@ -174,6 +174,16 @@
   -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
+.login-modes { display: flex; gap: 6px; margin: 20px 0; padding: 5px; border-radius: 12px; background: #f1f3fa; }
+.login-modes button { flex: 1; border: 0; border-radius: 9px; padding: 10px 6px; background: transparent; color: var(--ink-500); font: inherit; font-weight: 700; cursor: pointer; }
+.login-modes button.active { background: white; color: var(--navy-900); box-shadow: var(--shadow-sm); }
+.login-message { margin: 12px 0; color: var(--navy-900); font-size: .88rem; line-height: 1.5; }
+.login-actions { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0 14px; }
+.login-actions button, .password-setup__signout { padding: 0; border: 0; background: none; color: var(--navy-900); font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; }
+.password-setup { min-height: 100dvh; display: grid; place-items: center; padding: 20px; background: var(--bg); }
+.password-setup .login-card { max-width: 460px; }
+.password-setup__signout { display: block; margin: 18px auto 0; }
+
 .login-card__badge {
   display: inline-flex;
   align-items: center;

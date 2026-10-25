@@ -15,14 +15,13 @@ function createApp() {
   app.disable('x-powered-by');
   app.use(helmet());
   app.use(cors({ origin(origin, callback) { callback(null, !origin || config.frontendOrigins.includes(origin)); }, credentials: true }));
-  // The webhook needs exact bytes for HMAC verification, before the JSON parser runs.
-  app.use(`${config.prefix}/webhooks/whatsapp`, require('./routes/webhook'));
   app.use(express.json({ limit: '7mb' }));
   app.use(cookieParser());
   app.get(`${config.prefix}/health`, (_req, res) => res.status(mongoose.connection.readyState === 1 ? 200 : 503).json({ status: mongoose.connection.readyState === 1 ? 'ok' : 'database unavailable' }));
   app.use(`${config.prefix}/auth`, require('./routes/auth'));
   const api = express.Router();
   api.use(requireAuth);
+  api.use((req, _res, next) => req.user.mustChangePassword && req.session.method === 'PASSWORD' ? next(Object.assign(new Error('Change your initial password to continue.'), { status: 403 })) : next());
   api.use('/reference', require('./routes/reference'));
   api.use('/locations', require('./routes/locations'));
   api.use('/asset-types', require('./routes/assets'));
@@ -52,7 +51,7 @@ async function seedAdmin() {
   if (admin) return;
   if (!config.admin.email || !config.admin.password || config.admin.password.length < 10) throw new Error('Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD (10+ characters) in backend/.env for the first start.');
   admin = await User.create({ id: require('node:crypto').randomUUID(), name: config.admin.name, email: config.admin.email,
-    employeeId: config.admin.employeeId, role: 'MAIN_ADMIN', title: 'Administrator', status: 'ACTIVE', passwordHash: await argon2.hash(config.admin.password) });
+    employeeId: config.admin.employeeId, role: 'MAIN_ADMIN', title: 'Administrator', status: 'ACTIVE', mustChangePassword: true, passwordHash: await argon2.hash(config.admin.password) });
   console.log(`Main Admin account created for ${admin.email}`);
 }
 async function seedReference() {

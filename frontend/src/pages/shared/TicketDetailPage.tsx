@@ -327,7 +327,7 @@ function Composer({ ticket: t, user, onDone }: { ticket: Ticket; user: User; onD
         id="composer"
         className="textarea"
         rows={2}
-        placeholder={visibility === 'INTERNAL' ? 'Visible to staff only — never sent on WhatsApp' : 'Add an update…'}
+        placeholder={visibility === 'INTERNAL' ? 'Visible to staff only' : 'Add an update…'}
         value={body}
         onChange={(e) => setBody(e.target.value)}
       />

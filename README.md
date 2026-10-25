@@ -5,7 +5,7 @@ The frontend is React/Vite in `frontend/`. The backend is JavaScript, Node.js, E
 ## Run locally
 
 1. Start MongoDB locally or create a MongoDB Atlas database.
-2. In `backend/`, run `npm ci`, copy `.env.example` to `.env`, and set `MONGODB_URI`, `SEED_ADMIN_EMAIL` and a unique `SEED_ADMIN_PASSWORD` (at least 10 characters). The password creates the Main Admin on a new database; changing the environment value later does not reset an existing account.
+2. In `backend/`, run `npm ci`, copy `.env.example` to `.env`, and set `MONGODB_URI`, `SEED_ADMIN_EMAIL` and a unique `SEED_ADMIN_PASSWORD` (at least 10 characters). The password creates the Main Admin on a new database; the Main Admin must change it at first email sign-in. Changing the environment value later does not reset an existing account.
 3. Run `npm start` in `backend/`. The API starts on port 4000 by default. You can also run `node server.js` from `backend/src/`.
 4. In `frontend/`, run `npm ci` and `npm run dev`. Open `http://localhost:5173` and sign in with the Main Admin credentials from `.env`.
 
@@ -19,20 +19,18 @@ Ticket and account data, sessions, audit logs and images are stored in MongoDB. 
 
 - **Main Admin:** manages Users, Roles, Locations, Asset Types and Routing Rules; sees all tickets; can assign/reassign, reopen and cancel; reviews Escalations, Reports and Audit Logs. Reports can be downloaded as CSV.
 - **Sub-Admin:** logs in through the portal and sees only assigned tickets. They can start work, add internal notes, upload resolution evidence, mark resolved and request escalation if granted permission. The API checks assignment on each ticket operation.
-- **Lab Assistant:** can create a complaint through the portal or, when configured, WhatsApp; sees only their tickets; can add updates and confirm or dispute a resolution.
+- **Lab Assistant:** can create a complaint through the portal; sees only their tickets; can add updates and confirm or dispute a resolution.
 
 A resolver must upload evidence before marking a ticket resolved. The Lab Assistant can dispute a resolution within 72 hours. Ticket access is checked server-side, including direct API requests and image downloads.
 
-## WhatsApp Cloud API
+## Sign-in and MSG91 SMS setup
 
-Set `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID` and `WHATSAPP_API_VERSION` in `backend/.env` when the official business number is ready. Configure the Meta webhook callback to `https://YOUR_PUBLIC_HOST/api/v1/webhooks/whatsapp`, subscribe to the `messages` field, and use the same verify token. A reachable HTTPS endpoint is required for Meta to deliver messages. Only registered, active Lab Assistant mobile numbers enter the bot workflow.
+Users can sign in with a registered mobile number and a six-digit SMS code, or with an email address and password. The portal generates, stores, expires and verifies the SMS code itself. MSG91 is used only to send an ordinary SMS through its [Send SMS flow API](https://docs.msg91.com/sms/send-sms); the MSG91 OTP service is not used. Configure an approved MSG91 SMS template with `VAR1` as the six-digit code, then set `MSG91_AUTH_KEY` and `MSG91_SMS_TEMPLATE_ID` in `backend/.env`. The template text should say the code is for GEU portal sign-in and expires in five minutes. MSG91 account setup, sender ID and any required SMS template approvals must be completed before live delivery.
 
-The bot supports Create New Ticket, My Active Tickets, Check Ticket Status, Add Information and Help/Cancel. Ticket creation requires an image, asset, campus → building → floor → lab selection, a description and explicit confirmation. Interactive lists and reply buttons are sent through the [official Meta Cloud API message endpoint](https://www.postman.com/meta/whatsapp-business-platform/folder/o48mro7/messages). Incoming image IDs are resolved through the [Meta media endpoint](https://www.postman.com/meta/whatsapp-business-platform/request/ptjyi84/retrieve-media-url). The webhook verifies Meta's HMAC signature over the raw request body and deduplicates message IDs.
-
-If you have an approved two-parameter status template, set `WHATSAPP_STATUS_TEMPLATE` to its name. Its body parameters must be ticket code and status, in that order. Without a template, the backend attempts a normal text update; Meta may reject text outside the customer-service conversation window. Portal status updates remain available regardless of WhatsApp delivery.
+Codes expire after five minutes, are single-use, and allow five verification attempts. Requests have a one-minute resend wait and request limits. The application stores only a password hash of each code. SMS provider credentials are kept on the server. Email sign-in with an administrator-issued initial or reset password leads to a required password-change screen; API access is blocked until the password is changed. A mobile-only account can sign in without a password. Existing WhatsApp ticket source labels are retained for historical records, but the WhatsApp bot and webhook are removed.
 
 ## API and tests
 
-The API prefix is `/api/v1`. Auth uses an HttpOnly session cookie. The main routes are `/auth`, `/reference`, `/admin/users`, `/admin/locations`, `/admin/asset-types`, `/routing/rules`, `/tickets`, `/uploads`, `/admin/reports`, `/admin/audit-logs` and `/webhooks/whatsapp`.
+The API prefix is `/api/v1`. Auth uses an HttpOnly session cookie. The main routes are `/auth`, `/reference`, `/admin/users`, `/admin/locations`, `/admin/asset-types`, `/routing/rules`, `/tickets`, `/uploads`, `/admin/reports`, and `/admin/audit-logs`.
 
-Run `npm test` in `backend/` for the MongoDB and role workflow integration test. The test uses `MONGODB_TEST_URI` if set; otherwise it looks for a local `mongod` binary. Set `MONGOD_BINARY` to another binary path if needed. The test also exercises a signed webhook fixture and verifies that bot ticket creation waits for confirmation.
+Run `npm test` in `backend/` for the MongoDB and role workflow integration test. The test uses `MONGODB_TEST_URI` if set; otherwise it looks for a local `mongod` binary. Set `MONGOD_BINARY` to another binary path if needed. The test covers first-login password changes and the MSG91 SMS request and verification flow with a mocked SMS response.

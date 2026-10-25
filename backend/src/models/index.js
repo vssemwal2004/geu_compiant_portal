@@ -17,6 +17,7 @@ const userSchema = new Schema({
   permissions: { type: [String], default: [] },
   status: { type: String, enum: ['ACTIVE', 'INVITED', 'DISABLED'], default: 'INVITED' },
   passwordHash: { type: String, select: false },
+  mustChangePassword: { type: Boolean, default: false },
   lastLoginAt: Date,
 }, options('users'));
 userSchema.index({ role: 1, status: 1 });
@@ -24,9 +25,28 @@ userSchema.index({ role: 1, status: 1 });
 const sessionSchema = new Schema({
   tokenHash: { type: String, unique: true, required: true },
   userId: { type: String, required: true, index: true },
+  method: { type: String, enum: ['PASSWORD', 'SMS'], default: 'PASSWORD' },
   expiresAt: { type: Date, required: true },
 }, options('sessions'));
 sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+const otpSchema = new Schema({
+  phone: { type: String, unique: true, required: true },
+  codeHash: { type: String, required: true, select: false },
+  expiresAt: { type: Date, required: true },
+  resendAt: { type: Date, required: true },
+  attempts: { type: Number, default: 0 },
+  sends: { type: Number, default: 1 },
+  windowEndsAt: { type: Date, required: true },
+}, options('login_otps'));
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 3600 });
+
+const authLimitSchema = new Schema({
+  key: { type: String, unique: true, required: true },
+  count: { type: Number, default: 0 },
+  resetsAt: { type: Date, required: true },
+}, options('auth_limits'));
+authLimitSchema.index({ resetsAt: 1 }, { expireAfterSeconds: 3600 });
 
 const locationSchema = new Schema({
   id: { type: String, unique: true, required: true }, parentId: { type: String, default: null },
@@ -77,12 +97,6 @@ const attachmentSchema = new Schema({
 }, options('attachments'));
 attachmentSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const botSessionSchema = new Schema({
-  phone: { type: String, unique: true, required: true }, step: { type: String, default: 'MENU' },
-  draft: { type: Schema.Types.Mixed, default: {} }, updatedAt: Date,
-}, { collection: 'bot_sessions', versionKey: false });
-const inboundSchema = new Schema({ id: { type: String, unique: true, required: true }, processedAt: { type: Date, default: Date.now } }, { collection: 'whatsapp_inbound', versionKey: false });
-inboundSchema.index({ processedAt: 1 }, { expireAfterSeconds: 30 * 24 * 3600 });
 const counterSchema = new Schema({ name: { type: String, unique: true }, value: { type: Number, default: 0 } }, { collection: 'counters', versionKey: false });
 const auditSchema = new Schema({
   at: { type: Date, default: Date.now }, actorId: String, action: String, targetType: String,
@@ -92,9 +106,9 @@ auditSchema.index({ at: -1 });
 
 module.exports = {
   User: mongoose.model('User', userSchema), Session: mongoose.model('Session', sessionSchema),
+  LoginOtp: mongoose.model('LoginOtp', otpSchema), AuthLimit: mongoose.model('AuthLimit', authLimitSchema),
   Location: mongoose.model('Location', locationSchema), AssetType: mongoose.model('AssetType', assetSchema),
   RoutingRule: mongoose.model('RoutingRule', routingSchema), Ticket: mongoose.model('Ticket', ticketSchema),
-  Attachment: mongoose.model('Attachment', attachmentSchema), BotSession: mongoose.model('BotSession', botSessionSchema),
-  InboundMessage: mongoose.model('InboundMessage', inboundSchema), Counter: mongoose.model('Counter', counterSchema),
+  Attachment: mongoose.model('Attachment', attachmentSchema), Counter: mongoose.model('Counter', counterSchema),
   AuditLog: mongoose.model('AuditLog', auditSchema),
 };

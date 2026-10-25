@@ -18,14 +18,10 @@ const config = {
     password: process.env.SEED_ADMIN_PASSWORD,
   },
   seedReference: process.env.SEED_REFERENCE_DATA === 'true',
-  whatsapp: {
-    verifyToken: process.env.WHATSAPP_VERIFY_TOKEN,
-    appSecret: process.env.WHATSAPP_APP_SECRET,
-    accessToken: process.env.WHATSAPP_ACCESS_TOKEN,
-    phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
-    graphVersion: process.env.WHATSAPP_API_VERSION || 'v26.0',
-    graphBase: process.env.WHATSAPP_GRAPH_URL || 'https://graph.facebook.com',
-    statusTemplate: process.env.WHATSAPP_STATUS_TEMPLATE || '',
+  msg91: {
+    authKey: process.env.MSG91_AUTH_KEY,
+    templateId: process.env.MSG91_SMS_TEMPLATE_ID,
+    baseUrl: process.env.MSG91_SMS_URL || 'https://control.msg91.com/api/v5/flow',
   },
 };
 module.exports = config;

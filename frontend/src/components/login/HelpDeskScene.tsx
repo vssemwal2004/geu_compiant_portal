@@ -325,7 +325,7 @@ export default function HelpDeskScene() {
             <strong>New complaint</strong>
             <small>Computer · Lab 205</small>
           </span>
-          <em>WhatsApp</em>
+          <em>Portal</em>
         </div>
 
         <div className="hd-card hd-card--route">

@@ -85,5 +85,5 @@ export const canEscalate = (user: User, t: Ticket) =>
 
 export const canPostUpdate = (user: User, t: Ticket) => canView(user, t) && isActive(t);
 
-/** Internal notes are staff-only and never shown to the Lab Assistant or sent on WhatsApp. */
+/** Internal notes are staff-only and never shown to the Lab Assistant. */
 export const canSeeInternal = (user: User) => user.role !== 'LAB_ASSISTANT';

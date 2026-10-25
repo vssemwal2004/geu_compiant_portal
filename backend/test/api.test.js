@@ -4,7 +4,6 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const net = require('node:net');
-const crypto = require('node:crypto');
 const { spawn } = require('node:child_process');
 const request = require('supertest');
 const mongoose = require('mongoose');
@@ -25,7 +24,7 @@ async function waitMongo(uri) {
   throw new Error('Local MongoDB did not start.');
 }
 
-test('MongoDB-backed role workflow, evidence, access control, and bot confirmation', { skip: !process.env.MONGODB_TEST_URI && !fs.existsSync(binary) }, async () => {
+test('MongoDB-backed role workflow, password setup, SMS login, and access control', { skip: !process.env.MONGODB_TEST_URI && !fs.existsSync(binary) }, async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'geu-mongo-test-'));
   let processMongo;
   try {
@@ -39,17 +38,18 @@ test('MongoDB-backed role workflow, evidence, access control, and bot confirmati
     process.env.MONGODB_DB_NAME = `geu_test_${Date.now()}`;
     process.env.SEED_ADMIN_EMAIL = 'admin@example.com';
     process.env.SEED_ADMIN_PASSWORD = 'TestingPass123';
-    process.env.WHATSAPP_VERIFY_TOKEN = 'test-verify';
-    process.env.WHATSAPP_APP_SECRET = 'test-secret';
-    process.env.WHATSAPP_ACCESS_TOKEN = '';
-    process.env.WHATSAPP_PHONE_NUMBER_ID = '';
+    process.env.MSG91_AUTH_KEY = 'test-key';
+    process.env.MSG91_SMS_TEMPLATE_ID = 'test-template';
     const { start } = require('../src/server');
-    const { handleMessage } = require('../src/services/whatsapp');
     const app = await start();
     const root = '/api/v1';
     const admin = request.agent(app), lab = request.agent(app), sub = request.agent(app);
     assert.equal((await request(app).get(`${root}/tickets`)).status, 401);
-    assert.equal((await admin.post(`${root}/auth/login`).send({ identifier: 'admin@example.com', password: 'TestingPass123' })).status, 200);
+    const adminLogin = await admin.post(`${root}/auth/login`).send({ identifier: 'admin@example.com', password: 'TestingPass123' });
+    assert.equal(adminLogin.status, 200);
+    assert.equal(adminLogin.body.user.passwordChangeRequired, true);
+    assert.equal((await admin.get(`${root}/admin/users`)).status, 403);
+    assert.equal((await admin.post(`${root}/auth/change-password`).send({ currentPassword: 'TestingPass123', newPassword: 'AdminChanged123' })).status, 200);
     const makeLocation = async (name, type, parentId) => {
       const r = await admin.post(`${root}/admin/locations`).send({ name, type, parentId });
       assert.equal(r.status, 201, JSON.stringify(r.body)); return r.body.id;
@@ -64,13 +64,15 @@ test('MongoDB-backed role workflow, evidence, access control, and bot confirmati
     const labUser = await admin.post(`${root}/admin/users`).send({ name: 'Lab Assistant', email: 'lab@example.com', employeeId: 'GEU-L-201', role: 'LAB_ASSISTANT', phone: '+919000000001', password: 'ExamplePass123', allowedLocationIds: [building], defaultLocationId: room });
     assert.equal(subUser.status, 201, JSON.stringify(subUser.body));
     assert.equal(labUser.status, 201, JSON.stringify(labUser.body));
-    const botOnly = await admin.post(`${root}/admin/users`).send({ name: 'WhatsApp Assistant', employeeId: 'GEU-L-202', role: 'LAB_ASSISTANT', phone: '+919000000002', allowedLocationIds: [building], defaultLocationId: room });
+    const botOnly = await admin.post(`${root}/admin/users`).send({ name: 'SMS Assistant', employeeId: 'GEU-L-202', role: 'LAB_ASSISTANT', phone: '+919000000002', allowedLocationIds: [building], defaultLocationId: room });
     assert.equal(botOnly.status, 201, JSON.stringify(botOnly.body));
-    assert.equal(botOnly.body.status, 'INVITED');
-    assert.equal((await admin.patch(`${root}/admin/users/${botOnly.body.id}`).send({ status: 'ACTIVE' })).status, 200);
+    assert.equal(botOnly.body.status, 'ACTIVE');
     assert.equal((await admin.post(`${root}/routing/rules`).send({ locationId: building, assetTypeId: asset.body.id, subAdminId: subUser.body.id })).status, 201);
-    assert.equal((await lab.post(`${root}/auth/login`).send({ identifier: 'lab@example.com', password: 'ExamplePass123' })).status, 200);
+    assert.equal((await lab.post(`${root}/auth/login`).send({ identifier: 'lab@example.com', password: 'ExamplePass123' })).body.user.passwordChangeRequired, true);
+    assert.equal((await lab.get(`${root}/reference`)).status, 403);
+    assert.equal((await lab.post(`${root}/auth/change-password`).send({ currentPassword: 'ExamplePass123', newPassword: 'LabChanged123' })).status, 200);
     assert.equal((await sub.post(`${root}/auth/login`).send({ identifier: 'grit@example.com', password: 'ExamplePass123' })).status, 200);
+    assert.equal((await sub.post(`${root}/auth/change-password`).send({ currentPassword: 'ExamplePass123', newPassword: 'SubChanged123' })).status, 200);
     const labReference = await lab.get(`${root}/reference`);
     assert.equal(labReference.status, 200);
     assert.equal(labReference.body.users.some(user => user.email || user.phone || user.employeeId), false);
@@ -84,6 +86,7 @@ test('MongoDB-backed role workflow, evidence, access control, and bot confirmati
     assert.equal(otherSub.status, 201);
     const other = request.agent(app);
     assert.equal((await other.post(`${root}/auth/login`).send({ identifier: 'other@example.com', password: 'ExamplePass123' })).status, 200);
+    assert.equal((await other.post(`${root}/auth/change-password`).send({ currentPassword: 'ExamplePass123', newPassword: 'OtherChanged123' })).status, 200);
     assert.equal((await other.get(`${root}/tickets/${code}`)).status, 404);
     assert.equal((await other.get(created.body.imageUrl)).status, 404);
     assert.equal((await sub.get(`${root}/tickets/${code}`)).status, 200);
@@ -98,43 +101,26 @@ test('MongoDB-backed role workflow, evidence, access control, and bot confirmati
     assert.equal((await admin.get(`${root}/admin/reports`)).body.total, 1);
     assert.equal((await admin.get(`${root}/admin/audit-logs`)).status, 200);
     assert.equal((await admin.get(`${root}/admin/roles`)).body.length, 3);
-    const badWebhook = await request(app).post(`${root}/webhooks/whatsapp`).set('Content-Type', 'application/json').set('x-hub-signature-256', 'sha256=bad').send('{}');
-    assert.equal(badWebhook.status, 503);
-    const config = require('../src/config');
-    config.whatsapp.accessToken = 'fixture-token'; config.whatsapp.phoneNumberId = 'test-number';
-    const rejected = await request(app).post(`${root}/webhooks/whatsapp`).set('Content-Type', 'application/json').set('x-hub-signature-256', 'sha256=bad').send('{}');
-    assert.equal(rejected.status, 401);
-    assert.equal((await request(app).get(`${root}/webhooks/whatsapp`).query({ 'hub.mode': 'subscribe', 'hub.verify_token': 'test-verify', 'hub.challenge': 'verified' })).text, 'verified');
-    const signedBody = JSON.stringify({ entry: [{ changes: [{ value: { metadata: { phone_number_id: 'test-number' }, messages: [] } }] }] });
-    const signature = `sha256=${crypto.createHmac('sha256', 'test-secret').update(signedBody).digest('hex')}`;
-    assert.equal((await request(app).post(`${root}/webhooks/whatsapp`).set('Content-Type', 'application/json').set('x-hub-signature-256', signature).send(signedBody)).status, 200);
-    const sent = [];
-    const send = async (_to, payload) => sent.push(payload);
-    const media = async () => ({ mimeType: 'image/png', buffer: Buffer.from('bot-image') });
-    const phone = '919000000001';
-    const msg = (id, type, body) => ({ id, from: phone, type, ...(type === 'image' ? { image: { id: body } } : { text: { body } }) });
-    await handleMessage({ id: 'unknown-1', from: '919999999999', type: 'text', text: { body: 'Hi' } }, { send, text: async (_to, body) => sent.push(body), media });
-    assert.equal((await mongoose.model('BotSession').countDocuments({ phone: '+919999999999' })), 0);
-    assert.match(String(sent.at(-1)), /Access denied/);
-    const before = await mongoose.model('Ticket').countDocuments();
-    await handleMessage(msg('w1', 'text', 'Hi'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w2', 'text', 'Create'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w3', 'image', 'media-1'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w4', 'text', 'Computer'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w5', 'text', 'Main Campus'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w6', 'text', 'GR Block'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w7', 'text', 'Floor 2'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w8', 'text', 'Lab 205'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w9', 'text', 'The computer display is broken'), { send, text: async (_to, body) => sent.push(body), media });
-    assert.equal(await mongoose.model('Ticket').countDocuments(), before);
-    await handleMessage(msg('w10', 'text', 'Edit'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w11', 'text', 'EDIT_DESCRIPTION'), { send, text: async (_to, body) => sent.push(body), media });
-    await handleMessage(msg('w12', 'text', 'The computer monitor still flickers'), { send, text: async (_to, body) => sent.push(body), media });
-    assert.equal(await mongoose.model('Ticket').countDocuments(), before);
-    await handleMessage(msg('w13', 'text', 'Confirm'), { send, text: async (_to, body) => sent.push(body), media });
-    assert.equal(await mongoose.model('Ticket').countDocuments(), before + 1);
-    assert.equal((await mongoose.model('Ticket').findOne({ source: 'WHATSAPP' }).lean()).creatorId, labUser.body.id);
-    assert.equal((await mongoose.model('Ticket').findOne({ source: 'WHATSAPP' }).lean()).description, 'The computer monitor still flickers');
+    assert.equal((await request(app).post(`${root}/webhooks/whatsapp`).send({})).status, 401);
+    const originalFetch = global.fetch;
+    let smsCode;
+    global.fetch = async (url, options) => {
+      assert.equal(url, 'https://control.msg91.com/api/v5/flow');
+      assert.equal(options.headers.authkey, 'test-key');
+      const body = JSON.parse(options.body);
+      assert.equal(body.template_id, 'test-template');
+      smsCode = body.recipients[0].VAR1;
+      return { ok: true, json: async () => ({ type: 'success' }) };
+    };
+    try {
+      const mobile = request.agent(app);
+      assert.equal((await mobile.post(`${root}/auth/otp/request`).send({ phone: '+919000000002' })).status, 200);
+      assert.match(smsCode, /^\d{6}$/);
+      assert.equal((await mobile.post(`${root}/auth/otp/verify`).send({ phone: '+919000000002', code: smsCode === '999999' ? '000000' : '999999' })).status, 401);
+      assert.equal((await mobile.post(`${root}/auth/otp/verify`).send({ phone: '+919000000002', code: smsCode })).status, 200);
+      assert.equal((await mobile.get(`${root}/reference`)).status, 200);
+      assert.equal((await mobile.post(`${root}/auth/otp/verify`).send({ phone: '+919000000002', code: smsCode })).status, 401);
+    } finally { global.fetch = originalFetch; }
     const port = await freePort();
     const cli = spawn(process.execPath, ['server.js'], { cwd: path.join(__dirname, '../src'), env: { ...process.env, PORT: String(port) }, stdio: ['ignore', 'pipe', 'pipe'] });
     try {

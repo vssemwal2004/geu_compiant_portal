@@ -51,6 +51,7 @@ function quickLinkFor(user: User, tickets: Ticket[]): QuickLink {
 export default function AppLayout({ role }: { role: Role }) {
   const { user } = useSession();
   if (!user) return <Navigate to="/login" replace />;
+  if (user.passwordChangeRequired) return <Navigate to="/change-password" replace />;
   if (user.role !== role) return <Navigate to={roleHome[user.role]} replace />;
   return <Shell user={user} />;
 }

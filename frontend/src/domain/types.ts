@@ -22,6 +22,7 @@ export interface User {
   defaultLocationId?: string;
   permissions?: string[];
   status?: 'ACTIVE' | 'INVITED' | 'DISABLED';
+  passwordChangeRequired?: boolean;
 }
 
 export type LocationType = 'CAMPUS' | 'BUILDING' | 'FLOOR' | 'LAB';

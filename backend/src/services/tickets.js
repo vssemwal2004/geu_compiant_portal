@@ -99,8 +99,6 @@ async function changeStatus(user, code, to, note) {
   if (to === 'CLOSED') ticket.closedAt = new Date();
   addEvent(ticket, user.id, 'STATUS', { from, to, text: cleanNote || undefined });
   await ticket.save(); await audit(user.id, 'CHANGE_STATUS', 'Ticket', code, { from, to });
-  const { notifyStatus } = require('./whatsapp');
-  void notifyStatus(ticket).catch(cause => console.error('WhatsApp notification failed:', cause.message));
   return output(user, ticket);
 }
 async function addMessage(user, code, body, visibility = 'PUBLIC') {
