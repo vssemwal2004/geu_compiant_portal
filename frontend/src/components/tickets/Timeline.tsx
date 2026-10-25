@@ -18,7 +18,7 @@ function describe(e: TicketEvent): string {
     case 'MESSAGE':
       return `${userName(e.actorId)} posted an update`;
     case 'ESCALATION':
-      return `${userName(e.actorId)} requested Main Admin intervention`;
+      return `${userName(e.actorId)} requested Super Admin intervention`;
     case 'EVIDENCE':
       return `${userName(e.actorId)} uploaded resolution evidence`;
     case 'PRIORITY':

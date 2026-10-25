@@ -5,19 +5,20 @@ The frontend is React/Vite in `frontend/`. The backend is JavaScript, Node.js, E
 ## Run locally
 
 1. Start MongoDB locally or create a MongoDB Atlas database.
-2. In `backend/`, run `npm ci`, copy `.env.example` to `.env`, and set `MONGODB_URI`, `SEED_ADMIN_EMAIL` and a unique `SEED_ADMIN_PASSWORD` (at least 10 characters). The password creates the Main Admin on a new database; the Main Admin must change it at first email sign-in. Changing the environment value later does not reset an existing account.
+2. In `backend/`, run `npm ci`, copy `.env.example` to `.env`, and set `MONGODB_URI`, `SEED_ADMIN_EMAIL` and a unique `SEED_ADMIN_PASSWORD` (at least 10 characters). The password creates the Super Admin on a new database; the Super Admin must change it at first email sign-in. Changing the environment value later does not reset an existing account.
 3. Run `npm start` in `backend/`. The API starts on port 4000 by default. You can also run `node server.js` from `backend/src/`.
-4. In `frontend/`, run `npm ci` and `npm run dev`. Open `http://localhost:5173` and sign in with the Main Admin credentials from `.env`.
+4. In `frontend/`, run `npm ci` and `npm run dev`. Open `http://localhost:5173` and sign in with the Super Admin credentials from `.env`.
 
 Vite proxies `/api` to the Express server. Set `API_TARGET` when the API uses another local host or port. In production, serve the frontend and API from the same origin, or configure `FRONTEND_ORIGIN` and secure cross-site cookies over HTTPS.
 
-New databases start with only the Main Admin. The Main Admin can create campuses, buildings, floors, labs/rooms, asset types, Sub-Admins, Lab Assistants and routing rules in the portal. To load the included example locations and asset types into an empty database, set `SEED_REFERENCE_DATA=true` before starting the API. Example user accounts are not imported.
+New databases start with only the Super Admin (stored internally as `MAIN_ADMIN`). The Super Admin can create campuses, buildings, floors, labs/rooms, asset types, read-only Admins, Sub-Admins, Lab Assistants and routing rules in the portal. To load the included example locations and asset types into an empty database, set `SEED_REFERENCE_DATA=true` before starting the API. Example user accounts are not imported.
 
 Ticket and account data, sessions, audit logs and images are stored in MongoDB. Issue and evidence images are limited to 5 MB each. Back up the MongoDB database for persistence.
 
 ## Role flows
 
-- **Main Admin:** manages Users, Roles, Locations, Asset Types and Routing Rules; sees all tickets; can assign/reassign, reopen and cancel; reviews Escalations, Reports and Audit Logs. Reports can be downloaded as CSV.
+- **Super Admin:** manages Users, Roles, Locations, Asset Types and Routing Rules; sees all tickets; can assign/reassign, reopen and cancel; reviews Escalations, Reports and Audit Logs. Reports can be downloaded as CSV.
+- **Admin (read only):** sees the campus dashboard, all tickets and the unassigned queue. Can inspect ticket status, assignee, creator, images, evidence and the full activity history, including internal staff notes. Cannot create users or tickets, assign work, post notes, upload evidence or change status or settings. The API enforces these restrictions.
 - **Sub-Admin:** logs in through the portal and sees only assigned tickets. They can start work, add internal notes, upload resolution evidence, mark resolved and request escalation if granted permission. The API checks assignment on each ticket operation.
 - **Lab Assistant:** can create a complaint through the portal; sees only their tickets; can add updates and confirm or dispute a resolution.
 

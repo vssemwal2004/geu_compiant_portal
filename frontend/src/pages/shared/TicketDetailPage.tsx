@@ -164,7 +164,7 @@ function Detail({ ticket: t, user, home }: { ticket: Ticket; user: User; home: s
 
         <aside className="ticket__side">
           <EvidencePanel ticket={t} user={user} onDone={showToast} />
-          <Actions ticket={t} user={user} onDone={showToast} />
+          {user.role !== 'ADMIN' && <Actions ticket={t} user={user} onDone={showToast} />}
           {canAssign(user) && <AssignPanel ticket={t} user={user} onDone={showToast} />}
           {canEscalate(user, t) && <EscalatePanel ticket={t} user={user} onDone={showToast} />}
         </aside>
@@ -178,7 +178,7 @@ function EvidencePanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User
   const { addEvidence } = useTicketStore();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const canUpload = user.role !== 'LAB_ASSISTANT' && ['OPEN', 'IN_PROGRESS', 'REOPENED'].includes(t.status);
+  const canUpload = ['MAIN_ADMIN', 'SUB_ADMIN'].includes(user.role) && ['OPEN', 'IN_PROGRESS', 'REOPENED'].includes(t.status);
   async function upload(file?: File) {
     if (!file) return;
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) { setError('Use a JPG, PNG or WebP image up to 5 MB.'); return; }
@@ -278,7 +278,7 @@ function hint(t: Ticket, user: User, count: number): string {
   }
   switch (t.status) {
     case 'OPEN':
-      return t.assignedTo ? `Waiting for ${userName(t.assignedTo)} to accept.` : 'Waiting for the Main Admin to assign a team.';
+      return t.assignedTo ? `Waiting for ${userName(t.assignedTo)} to accept.` : 'Waiting for the Super Admin to assign a team.';
     case 'IN_PROGRESS':
     case 'REOPENED':
       return `${userName(t.assignedTo)} is working on it.`;
@@ -341,7 +341,7 @@ function Composer({ ticket: t, user, onDone }: { ticket: Ticket; user: User; onD
   );
 }
 
-/* ---------- Main Admin: reassign ---------- */
+/* ---------- Super Admin: reassign ---------- */
 function AssignPanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User; onDone: (m: string) => void }) {
   const { reassign } = useTicketStore();
   const subAdmins = users.filter((u) => u.role === 'SUB_ADMIN');
@@ -398,7 +398,7 @@ function AssignPanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User; 
   );
 }
 
-/* ---------- Sub-Admin: escalate to Main Admin ---------- */
+/* ---------- Sub-Admin: escalate to Super Admin ---------- */
 function EscalatePanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User; onDone: (m: string) => void }) {
   const { requestEscalation } = useTicketStore();
   const [open, setOpen] = useState(false);
@@ -411,7 +411,7 @@ function EscalatePanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User
       await requestEscalation(user, t.id, reason);
       setReason('');
       setOpen(false);
-      onDone('Escalation sent to the Main Admin');
+      onDone('Escalation sent to the Super Admin');
     } catch (error) { onDone(error instanceof Error ? error.message : 'Action failed.'); }
   }
 
@@ -420,7 +420,7 @@ function EscalatePanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User
       <header className="panel__head">
         <div>
           <h3>Need help?</h3>
-          <p>Wrong team, or needs another department? Ask the Main Admin to reassign.</p>
+          <p>Wrong team, or needs another department? Ask the Super Admin to reassign.</p>
         </div>
       </header>
       {open ? (

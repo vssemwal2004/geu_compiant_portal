@@ -25,6 +25,7 @@ const PRIORITIES: TicketPriority[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 
 const copy = {
   MAIN_ADMIN: { title: 'All tickets', lead: 'Every ticket across campus.' },
+  ADMIN: { title: 'All tickets', lead: 'View ticket status, assignment and full details across campus.' },
   SUB_ADMIN: { title: 'Assigned tickets', lead: 'Only tickets assigned to you are shown.' },
   LAB_ASSISTANT: { title: 'My tickets', lead: 'Tickets you raised through the portal.' },
 };
@@ -78,7 +79,7 @@ export default function TicketsPage({ unassignedOnly = false }: { unassignedOnly
   }, [scoped]);
 
   const head = unassignedOnly
-    ? { title: 'Unassigned queue', lead: 'Tickets no routing rule matched. Open one to assign a Sub-Admin.' }
+    ? { title: 'Unassigned queue', lead: user.role === 'ADMIN' ? 'Tickets waiting for assignment. Open one to view its details.' : 'Tickets no routing rule matched. Open one to assign a Sub-Admin.' }
     : copy[user.role];
 
   return (

@@ -52,7 +52,7 @@ async function seedAdmin() {
   if (!config.admin.email || !config.admin.password || config.admin.password.length < 10) throw new Error('Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD (10+ characters) in backend/.env for the first start.');
   admin = await User.create({ id: require('node:crypto').randomUUID(), name: config.admin.name, email: config.admin.email,
     employeeId: config.admin.employeeId, role: 'MAIN_ADMIN', title: 'Administrator', status: 'ACTIVE', mustChangePassword: true, passwordHash: await argon2.hash(config.admin.password) });
-  console.log(`Main Admin account created for ${admin.email}`);
+  console.log(`Super Admin account created for ${admin.email}`);
 }
 async function seedReference() {
   if (!config.seedReference) return;

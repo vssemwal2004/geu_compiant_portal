@@ -60,6 +60,16 @@ export const navByRole: Record<Role, NavGroup[]> = {
       ],
     },
   ],
+  ADMIN: [
+    {
+      title: 'Overview',
+      items: [
+        { label: 'Dashboard', path: '/viewer-admin', icon: LayoutDashboard },
+        { label: 'All Tickets', path: '/viewer-admin/tickets', icon: ClipboardList },
+        { label: 'Unassigned Queue', path: '/viewer-admin/unassigned', icon: Inbox },
+      ],
+    },
+  ],
   SUB_ADMIN: [
     {
       title: 'Work',

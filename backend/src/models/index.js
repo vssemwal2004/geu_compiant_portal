@@ -7,7 +7,7 @@ const userSchema = new Schema({
   name: { type: String, required: true, trim: true, maxlength: 120 },
   email: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
   employeeId: { type: String, required: true, unique: true, uppercase: true, trim: true },
-  role: { type: String, enum: ['MAIN_ADMIN', 'SUB_ADMIN', 'LAB_ASSISTANT'], required: true },
+  role: { type: String, enum: ['MAIN_ADMIN', 'ADMIN', 'SUB_ADMIN', 'LAB_ASSISTANT'], required: true },
   title: String,
   phone: String,
   phoneE164: { type: String, unique: true, sparse: true },

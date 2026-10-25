@@ -152,7 +152,7 @@ export default function LabDashboard() {
             <header className="panel__head">
               <div>
                 <h3>Where you can report</h3>
-                <p>Set by the Main Admin</p>
+                <p>Set by the Super Admin</p>
               </div>
             </header>
             <ul className="place-list">

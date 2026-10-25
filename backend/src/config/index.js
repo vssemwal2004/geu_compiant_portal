@@ -12,7 +12,7 @@ const config = {
   cookieSecure: process.env.COOKIE_SECURE === 'true',
   cookieSameSite: process.env.COOKIE_SAMESITE || 'lax',
   admin: {
-    name: process.env.SEED_ADMIN_NAME || 'Main Admin',
+    name: process.env.SEED_ADMIN_NAME || 'Super Admin',
     email: process.env.SEED_ADMIN_EMAIL,
     employeeId: process.env.SEED_ADMIN_EMPLOYEE_ID || 'GEU-A-001',
     password: process.env.SEED_ADMIN_PASSWORD,

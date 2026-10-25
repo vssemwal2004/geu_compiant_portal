@@ -15,7 +15,7 @@ router.post('/:code/messages', wrap(async (req, res) => res.json(await service.a
 router.patch('/:code/assignee', wrap(async (req, res) => res.json(await service.assign(req.user, req.params.code, req.body.assigneeId, req.body.reason))));
 router.post('/:code/escalations', wrap(async (req, res) => res.json(await service.escalate(req.user, req.params.code, req.body.reason))));
 router.patch('/:code/priority', wrap(async (req, res) => {
-  if (req.user.role !== 'MAIN_ADMIN') error(403, 'Main Admin only.');
+  if (req.user.role !== 'MAIN_ADMIN') error(403, 'Super Admin only.');
   const ticket = await service.getVisible(req.user, req.params.code);
   if (!service.SLA_HOURS[req.body.priority]) error(400, 'Invalid priority.');
   const from = ticket.priority; ticket.priority = req.body.priority;

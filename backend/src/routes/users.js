@@ -4,7 +4,7 @@ const { User, Session, Location, LoginOtp } = require('../models');
 const { id, error, text, plain, phoneE164, ancestry, audit, wrap, mainAdmin } = require('../services/common');
 const router = express.Router();
 router.use(mainAdmin);
-const validRoles = ['SUB_ADMIN', 'LAB_ASSISTANT'];
+const validRoles = ['ADMIN', 'SUB_ADMIN', 'LAB_ASSISTANT'];
 const validStatuses = ['ACTIVE', 'INVITED', 'DISABLED'];
 async function checkLocations(ids) {
   if (!Array.isArray(ids) || ids.length > 50) error(400, 'Invalid location scope.');
@@ -46,7 +46,7 @@ router.post('/', wrap(async (req, res) => {
   }
   const user = await User.create({ id: id(), name, email, employeeId, role, title: req.body.title || '', phone, phoneE164: phone,
     allowedLocationIds, scopeLocationIds, defaultLocationId: req.body.defaultLocationId || undefined,
-    permissions: role === 'SUB_ADMIN' ? ['RESOLVE_ASSIGNED', ...(req.body.canEscalate === false ? [] : ['ESCALATE_ASSIGNED'])] : ['CREATE_OWN', 'VIEW_OWN'],
+    permissions: role === 'ADMIN' ? ['VIEW_ALL'] : role === 'SUB_ADMIN' ? ['RESOLVE_ASSIGNED', ...(req.body.canEscalate === false ? [] : ['ESCALATE_ASSIGNED'])] : ['CREATE_OWN', 'VIEW_OWN'],
     passwordHash, mustChangePassword: !!passwordHash, status: passwordHash || phone ? 'ACTIVE' : 'INVITED' });
   await audit(req.user.id, 'CREATE_USER', 'User', user.id, { role });
   res.status(201).json(plain(user));
@@ -56,7 +56,7 @@ router.patch('/:id', wrap(async (req, res) => {
   if (!user) error(404, 'User not found.');
   const previousEmail = user.email;
   const previousPhone = user.phoneE164;
-  if (user.role === 'MAIN_ADMIN' && user.id !== req.user.id) error(403, 'Cannot edit another Main Admin.');
+  if (user.role === 'MAIN_ADMIN' && user.id !== req.user.id) error(403, 'Cannot edit another Super Admin.');
   if (req.body.name !== undefined) user.name = text(req.body.name, 'name', 120);
   if (req.body.title !== undefined) user.title = String(req.body.title).slice(0, 80);
   if (req.body.email !== undefined) {

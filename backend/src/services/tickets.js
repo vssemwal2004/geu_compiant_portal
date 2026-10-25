@@ -8,7 +8,7 @@ const sizeLimit = 5 * 1024 * 1024;
 const imageTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
 function visible(user, ticket) {
-  return user.role === 'MAIN_ADMIN' || (user.role === 'SUB_ADMIN' && ticket.assignedTo === user.id) || (user.role === 'LAB_ASSISTANT' && ticket.creatorId === user.id);
+  return ['MAIN_ADMIN', 'ADMIN'].includes(user.role) || (user.role === 'SUB_ADMIN' && ticket.assignedTo === user.id) || (user.role === 'LAB_ASSISTANT' && ticket.creatorId === user.id);
 }
 function output(user, ticket) {
   const value = plain(ticket);
@@ -29,10 +29,10 @@ async function getVisible(user, code) {
   return ticket;
 }
 async function scopedList(user, query = {}) {
-  const scope = user.role === 'MAIN_ADMIN' ? {} : user.role === 'SUB_ADMIN' ? { assignedTo: user.id } : { creatorId: user.id };
+  const scope = ['MAIN_ADMIN', 'ADMIN'].includes(user.role) ? {} : user.role === 'SUB_ADMIN' ? { assignedTo: user.id } : { creatorId: user.id };
   const filter = { ...scope };
   if (query.status && statuses.includes(query.status)) filter.status = query.status;
-  if (query.unassigned === 'true' && user.role === 'MAIN_ADMIN') filter.assignedTo = null;
+  if (query.unassigned === 'true' && ['MAIN_ADMIN', 'ADMIN'].includes(user.role)) filter.assignedTo = null;
   const tickets = await Ticket.find(filter).sort({ createdAt: -1 }).limit(500).lean();
   return tickets.map(t => output(user, t));
 }
@@ -102,6 +102,7 @@ async function changeStatus(user, code, to, note) {
   return output(user, ticket);
 }
 async function addMessage(user, code, body, visibility = 'PUBLIC') {
+  if (user.role === 'ADMIN') error(403, 'Read-only admins cannot change tickets.');
   const ticket = await getVisible(user, code);
   if (!activeStatuses.includes(ticket.status)) error(400, 'This ticket is closed.');
   if (visibility === 'INTERNAL' && user.role === 'LAB_ASSISTANT') error(403, 'Internal notes are staff only.');
@@ -111,7 +112,7 @@ async function addMessage(user, code, body, visibility = 'PUBLIC') {
   return output(user, ticket);
 }
 async function assign(user, code, assigneeId, reason) {
-  if (user.role !== 'MAIN_ADMIN') error(403, 'Main Admin only.');
+  if (user.role !== 'MAIN_ADMIN') error(403, 'Super Admin only.');
   const ticket = await getVisible(user, code);
   if (['CLOSED', 'CANCELLED'].includes(ticket.status)) error(400, 'This ticket is closed.');
   const { User } = require('../models');

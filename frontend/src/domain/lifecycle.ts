@@ -73,7 +73,7 @@ export function availableTransitions(t: Ticket, user: User, now = Date.now()): T
 
 /** Role scoping (PDF §3): admin sees all, sub-admin assigned only, lab assistant own only. */
 export function canView(user: User, t: Ticket) {
-  if (user.role === 'MAIN_ADMIN') return true;
+  if (user.role === 'MAIN_ADMIN' || user.role === 'ADMIN') return true;
   if (user.role === 'SUB_ADMIN') return t.assignedTo === user.id;
   return t.creatorId === user.id;
 }
@@ -83,7 +83,7 @@ export const canAssign = (user: User) => user.role === 'MAIN_ADMIN';
 export const canEscalate = (user: User, t: Ticket) =>
   user.role === 'SUB_ADMIN' && user.permissions?.includes('ESCALATE_ASSIGNED') && t.assignedTo === user.id && isActive(t);
 
-export const canPostUpdate = (user: User, t: Ticket) => canView(user, t) && isActive(t);
+export const canPostUpdate = (user: User, t: Ticket) => user.role !== 'ADMIN' && canView(user, t) && isActive(t);
 
 /** Internal notes are staff-only and never shown to the Lab Assistant. */
 export const canSeeInternal = (user: User) => user.role !== 'LAB_ASSISTANT';

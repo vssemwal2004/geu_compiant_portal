@@ -142,7 +142,7 @@ export default function CreateTicketPage() {
               ) : (
                 <>
                   No team is mapped to this lab and asset yet, so it is in the <strong>unassigned queue</strong>. The
-                  Main Admin can assign it from the unassigned queue.
+                  Super Admin can assign it from the unassigned queue.
                 </>
               )}
             </span>
@@ -429,7 +429,7 @@ export default function CreateTicketPage() {
                 ) : (
                   <>
                     No team is mapped to this lab and asset yet. It will go to the <strong>unassigned queue</strong> for
-                    the Main Admin.
+                    the Super Admin.
                   </>
                 )}
               </span>

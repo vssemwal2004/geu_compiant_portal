@@ -24,7 +24,7 @@ export function TicketStoreProvider({ children }: { children: ReactNode }) {
     setTickets(all);
   }, []);
   useEffect(() => {
-    if (!user) { setTickets([]); return; }
+    if (!user || user.passwordChangeRequired) { setTickets([]); return; }
     void refresh().catch(console.error);
     const timer = window.setInterval(() => { if (!document.hidden) void refresh().catch(console.error); }, 20_000);
     const onVisible = () => { if (!document.hidden) void refresh().catch(console.error); };

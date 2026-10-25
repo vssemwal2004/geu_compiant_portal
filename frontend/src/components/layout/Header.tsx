@@ -39,7 +39,7 @@ export default function Header({ title, onOpenMenu, menuOpen, quickLink }: Props
   const notifications = useMemo(() => notificationsFor(user, tickets), [user, tickets]);
   const unread = notifications.filter((n) => n.unread).length;
   // Sub-Admins work tickets but never create them (PDF §3).
-  const canCreate = user.role !== 'SUB_ADMIN';
+  const canCreate = user.role === 'MAIN_ADMIN' || user.role === 'LAB_ASSISTANT';
   const QuickIcon = quickLink.icon;
 
   // Ctrl/Cmd + K focuses search; Escape closes popovers.

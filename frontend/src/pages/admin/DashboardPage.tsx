@@ -10,7 +10,7 @@ import { isActive, isOverdue, isPendingWork } from '../../domain/lifecycle';
 import { ancestorOfType, locationPath } from '../../domain/locations';
 import { greeting } from '../../domain/format';
 import type { TicketPriority, TicketStatus } from '../../domain/types';
-import { useCurrentUser } from '../../state/session';
+import { roleHome, useCurrentUser } from '../../state/session';
 import { useVisibleTickets } from '../../state/ticketStore';
 
 const filters: { key: 'ALL' | TicketStatus; label: string }[] = [
@@ -25,6 +25,8 @@ const WEEK_MS = 7 * 24 * 3_600_000;
 
 export default function DashboardPage() {
   const user = useCurrentUser();
+  const home = roleHome[user.role];
+  const readOnly = user.role === 'ADMIN';
   const tickets = useVisibleTickets(user);
   const [filter, setFilter] = useState<(typeof filters)[number]['key']>('ALL');
 
@@ -62,18 +64,18 @@ export default function DashboardPage() {
             {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </span>
           <h2>
-            {greeting()}, <span>Admin</span>
+            {greeting()}, <span>{readOnly ? 'Admin' : 'Super Admin'}</span>
           </h2>
           <p>Here is what is happening across campus today.</p>
         </div>
-        <div className="hero__actions">
+        {!readOnly && <div className="hero__actions">
           <Link to="/admin/users" className="btn btn-accent">
             <UserPlus size={18} /> Add user
           </Link>
           <Link to="/admin/routing-rules" className="btn hero__btn-glass">
             <GitBranch size={18} /> Routing rule
           </Link>
-        </div>
+        </div>}
       </section>
 
       <section className="kpis" aria-label="Key figures">
@@ -113,9 +115,9 @@ export default function DashboardPage() {
             </div>
           </header>
 
-          <TicketTable tickets={rows} basePath="/admin" emptyText="No tickets with this status." />
+          <TicketTable tickets={rows} basePath={home} emptyText="No tickets with this status." />
 
-          <Link to="/admin/tickets" className="panel__more">
+          <Link to={`${home}/tickets`} className="panel__more">
             View all tickets <ArrowRight size={16} />
           </Link>
         </section>
@@ -136,7 +138,7 @@ export default function DashboardPage() {
                 {unassigned.map((t) => (
                   <li key={t.id} className="queue__item">
                     <div className="queue__body">
-                      <Link to={`/admin/tickets/${t.id}`} className="t-code">
+                      <Link to={`${home}/tickets/${t.id}`} className="t-code">
                         {t.id}
                       </Link>
                       <span className="t-meta">
@@ -144,8 +146,8 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <PriorityBadge priority={t.priority} />
-                    <Link to={`/admin/tickets/${t.id}`} className="queue__assign">
-                      Assign
+                    <Link to={`${home}/tickets/${t.id}`} className="queue__assign">
+                      {readOnly ? 'View' : 'Assign'}
                     </Link>
                   </li>
                 ))}
@@ -171,9 +173,9 @@ export default function DashboardPage() {
             <h3>Tickets by building</h3>
             <p>All tickets · {tickets.length} total</p>
           </div>
-          <Link to="/admin/reports" className="panel__link">
+          {!readOnly && <Link to="/admin/reports" className="panel__link">
             Reports <ArrowRight size={16} />
-          </Link>
+          </Link>}
         </header>
         <BarList items={byBuilding} wide />
       </section>

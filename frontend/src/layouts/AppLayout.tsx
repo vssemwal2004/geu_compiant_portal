@@ -31,6 +31,13 @@ function quickLinkFor(user: User, tickets: Ticket[]): QuickLink {
         icon: Inbox,
         count: tickets.filter((t) => t.assignedTo === null && isActive(t)).length,
       };
+    case 'ADMIN':
+      return {
+        to: '/viewer-admin/unassigned',
+        label: 'Unassigned tickets',
+        icon: Inbox,
+        count: tickets.filter((t) => t.assignedTo === null && isActive(t)).length,
+      };
     case 'SUB_ADMIN':
       return {
         to: '/sub-admin/tickets?status=OPEN',

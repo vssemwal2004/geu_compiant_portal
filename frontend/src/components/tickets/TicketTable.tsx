@@ -107,6 +107,7 @@ export default function TicketTable({
               <p className="ticket-card__loc">
                 <MapPin size={14} aria-hidden="true" /> {assetName(t.assetTypeId)} · {locationPath(t.locationId)}
               </p>
+              {showAssignee && <p className="ticket-card__loc">Assigned to: {t.assignedTo ? userName(t.assignedTo) : 'Unassigned'}</p>}
               {showProgress && <StatusStepper status={t.status} compact />}
               <div className="ticket-card__foot">
                 <PriorityBadge priority={t.priority} />

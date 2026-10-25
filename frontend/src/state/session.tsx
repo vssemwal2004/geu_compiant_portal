@@ -5,12 +5,14 @@ import type { Role, User } from '../domain/types';
 
 export const roleHome: Record<Role, string> = {
   MAIN_ADMIN: '/admin',
+  ADMIN: '/viewer-admin',
   SUB_ADMIN: '/sub-admin',
   LAB_ASSISTANT: '/app',
 };
 
 export const roleLabel: Record<Role, string> = {
-  MAIN_ADMIN: 'Main Admin',
+  MAIN_ADMIN: 'Super Admin',
+  ADMIN: 'Admin',
   SUB_ADMIN: 'Sub-Admin',
   LAB_ASSISTANT: 'Lab Assistant',
 };

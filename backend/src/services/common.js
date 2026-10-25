@@ -39,5 +39,5 @@ async function audit(actorId, action, targetType, targetId, details = {}) {
   await AuditLog.create({ actorId, action, targetType, targetId, details });
 }
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
-const mainAdmin = (req, _res, next) => req.user.role === 'MAIN_ADMIN' ? next() : next(Object.assign(new Error('Main Admin only.'), { status: 403 }));
+const mainAdmin = (req, _res, next) => req.user.role === 'MAIN_ADMIN' ? next() : next(Object.assign(new Error('Super Admin only.'), { status: 403 }));
 module.exports = { id, error, text, plain, phoneE164, ancestry, routeFor, audit, wrap, mainAdmin };

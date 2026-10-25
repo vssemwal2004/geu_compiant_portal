@@ -41,7 +41,7 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/change-password" element={<ChangePasswordPage />} />
 
-      {/* Main Admin */}
+      {/* Super Admin */}
       <Route path="/admin" element={<AppLayout role="MAIN_ADMIN" />}>
         <Route index element={<DashboardPage />} />
         <Route path="tickets" element={<TicketsPage />} />
@@ -57,6 +57,14 @@ export default function App() {
         <Route path="reports" element={<ReportsPage />} />
         <Route path="audit-log" element={<AuditLogsPage />} />
         {placeholderRoutes('MAIN_ADMIN', '/admin')}
+      </Route>
+
+      {/* Read-only Admin: campus overview and ticket details */}
+      <Route path="/viewer-admin" element={<AppLayout role="ADMIN" />}>
+        <Route index element={<DashboardPage />} />
+        <Route path="tickets" element={<TicketsPage />} />
+        <Route path="unassigned" element={<TicketsPage unassignedOnly />} />
+        <Route path="tickets/:id" element={<TicketDetailPage />} />
       </Route>
 
       {/* Sub-Admin: portal only, assigned tickets only */}

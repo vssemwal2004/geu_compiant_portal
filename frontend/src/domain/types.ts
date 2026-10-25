@@ -1,7 +1,7 @@
 // Domain types shared by every role. They mirror the backend collections in the plan
 // (users, locations, assetTypes, routingRules, tickets + ticketEvents).
 
-export type Role = 'MAIN_ADMIN' | 'SUB_ADMIN' | 'LAB_ASSISTANT';
+export type Role = 'MAIN_ADMIN' | 'ADMIN' | 'SUB_ADMIN' | 'LAB_ASSISTANT';
 
 export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REOPENED' | 'CLOSED' | 'CANCELLED';
 export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
