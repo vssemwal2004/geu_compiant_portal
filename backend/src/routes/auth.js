@@ -68,7 +68,7 @@ router.post('/otp/request', wrap(async (req, res) => {
     $set: { codeHash, expiresAt: new Date(now.getTime() + 5 * MINUTE), resendAt: new Date(now.getTime() + MINUTE), attempts: 0,
       sends: existing?.windowEndsAt > now ? existing.sends + 1 : 1,
       windowEndsAt: existing?.windowEndsAt > now ? existing.windowEndsAt : new Date(now.getTime() + 60 * MINUTE) },
-  }, { upsert: true, new: true });
+  }, { upsert: true, returnDocument: 'after' });
   try { await sendLoginCode(phone, code); }
   catch (cause) { await LoginOtp.deleteOne({ _id: challenge._id, codeHash }); throw cause; }
   res.json(message);

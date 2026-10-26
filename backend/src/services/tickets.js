@@ -63,7 +63,7 @@ async function create(user, input, opts = {}) {
   } else error(400, 'An issue image is required.');
   const rule = await routeFor(location.id, asset.id);
   const now = new Date();
-  const counter = await Counter.findOneAndUpdate({ name: `ticket-${now.getFullYear()}` }, { $inc: { value: 1 } }, { upsert: true, new: true, setDefaultsOnInsert: true });
+  const counter = await Counter.findOneAndUpdate({ name: `ticket-${now.getFullYear()}` }, { $inc: { value: 1 } }, { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true });
   const code = `GEU-${now.getFullYear()}-${String(counter.value).padStart(6, '0')}`;
   const ticket = new Ticket({ id: code, creatorId: user.id, locationId: location.id, assetTypeId: asset.id,
     assignedTo: rule?.subAdminId || null, routingRuleId: rule?.id || null, status: 'OPEN', priority: asset.defaultPriority,
