@@ -38,10 +38,13 @@ test('MongoDB-backed role workflow, password setup, SMS login, and access contro
     process.env.MONGODB_DB_NAME = `geu_test_${Date.now()}`;
     process.env.SEED_ADMIN_EMAIL = 'admin@example.com';
     process.env.SEED_ADMIN_PASSWORD = 'TestingPass123';
-    process.env.MSG91_AUTH_KEY = 'test-key';
-    process.env.MSG91_SMS_TEMPLATE_ID = 'test-template';
+    process.env.SEED_ADMIN_MOBILE = '+919000000003';
+    process.env.SMS_API_KEY = 'test-key';
+    process.env.SMS_TEMPLATE_ID = 'test-template';
+    process.env.SMS_SENDER_ID = 'GECET';
     const { start } = require('../src/server');
     const app = await start();
+    assert.equal((await require('../src/models').User.findOne({ role: 'MAIN_ADMIN' }).lean()).phoneE164, '+919000000003');
     const root = '/api/v1';
     const admin = request.agent(app), lab = request.agent(app), sub = request.agent(app);
     assert.equal((await request(app).get(`${root}/tickets`)).status, 401);
@@ -131,7 +134,9 @@ test('MongoDB-backed role workflow, password setup, SMS login, and access contro
       assert.equal(options.headers.authkey, 'test-key');
       const body = JSON.parse(options.body);
       assert.equal(body.template_id, 'test-template');
-      smsCode = body.recipients[0].VAR1;
+      assert.equal(body.sender, 'GECET');
+      assert.equal(body.recipients[0].Validity, '5');
+      smsCode = body.recipients[0].OTP;
       return { ok: true, json: async () => ({ type: 'success' }) };
     };
     try {

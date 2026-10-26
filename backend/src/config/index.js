@@ -15,12 +15,14 @@ const config = {
     name: process.env.SEED_ADMIN_NAME || 'Super Admin',
     email: process.env.SEED_ADMIN_EMAIL,
     employeeId: process.env.SEED_ADMIN_EMPLOYEE_ID || 'GEU-A-001',
+    phone: process.env.SEED_ADMIN_MOBILE,
     password: process.env.SEED_ADMIN_PASSWORD,
   },
   seedReference: process.env.SEED_REFERENCE_DATA === 'true',
   msg91: {
-    authKey: process.env.MSG91_AUTH_KEY,
-    templateId: process.env.MSG91_SMS_TEMPLATE_ID,
+    authKey: process.env.SMS_API_KEY || process.env.MSG91_AUTH_KEY,
+    templateId: process.env.SMS_TEMPLATE_ID || process.env.MSG91_SMS_TEMPLATE_ID,
+    senderId: process.env.SMS_SENDER_ID,
     baseUrl: process.env.MSG91_SMS_URL || 'https://control.msg91.com/api/v5/flow',
   },
 };

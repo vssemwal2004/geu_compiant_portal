@@ -7,7 +7,7 @@ const argon2 = require('argon2');
 const config = require('./config');
 const { User, Location, AssetType } = require('./models');
 const { requireAuth } = require('./middleware/auth');
-const { mainAdmin } = require('./services/common');
+const { mainAdmin, phoneE164 } = require('./services/common');
 
 function createApp() {
   const app = express();
@@ -48,10 +48,19 @@ function createApp() {
 }
 async function seedAdmin() {
   let admin = await User.findOne({ role: 'MAIN_ADMIN' }).select('+passwordHash');
-  if (admin) return;
+  if (admin) {
+    if (config.admin.phone && !admin.phoneE164) {
+      admin.phone = config.admin.phone;
+      admin.phoneE164 = phoneE164(config.admin.phone);
+      await admin.save();
+    }
+    return;
+  }
   if (!config.admin.email || !config.admin.password || config.admin.password.length < 10) throw new Error('Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD (10+ characters) in backend/.env for the first start.');
   admin = await User.create({ id: require('node:crypto').randomUUID(), name: config.admin.name, email: config.admin.email,
-    employeeId: config.admin.employeeId, role: 'MAIN_ADMIN', title: 'Administrator', status: 'ACTIVE', mustChangePassword: true, passwordHash: await argon2.hash(config.admin.password) });
+    employeeId: config.admin.employeeId, phone: config.admin.phone || undefined,
+    phoneE164: config.admin.phone ? phoneE164(config.admin.phone) : undefined,
+    role: 'MAIN_ADMIN', title: 'Administrator', status: 'ACTIVE', mustChangePassword: true, passwordHash: await argon2.hash(config.admin.password) });
   console.log(`Super Admin account created for ${admin.email}`);
 }
 async function seedReference() {
@@ -69,7 +78,7 @@ async function start() {
 }
 if (require.main === module) {
   start().then(app => {
-    const server = app.listen(config.port, () => console.log(`API ready at http://localhost:${config.port}${config.prefix}`));
+    const server = app.listen(config.port, process.env.HOST || '127.0.0.1', () => console.log(`API ready at http://localhost:${config.port}${config.prefix}`));
     server.on('error', cause => { console.error('Could not start API:', cause.message); process.exitCode = 1; });
     for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => mongoose.disconnect().finally(() => process.exit(0))));
   }).catch(cause => { console.error('Could not initialize API:', cause.message); process.exitCode = 1; mongoose.disconnect().catch(() => {}); });
