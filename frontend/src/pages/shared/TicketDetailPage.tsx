@@ -95,7 +95,9 @@ function Detail({ ticket: t, user, home }: { ticket: Ticket; user: User; home: s
             <div className="issue">
               <div className="issue__photo">
                 {t.imageUrl ? (
-                  <img src={t.imageUrl} alt="Photo attached to this ticket" />
+                  <a href={t.imageUrl} target="_blank" rel="noopener noreferrer" aria-label="Open issue photo full size">
+                    <img src={t.imageUrl} alt="Photo attached to this ticket" />
+                  </a>
                 ) : (
                   <span className="issue__nophoto">
                     <ImageOff size={26} />
@@ -190,7 +192,10 @@ function EvidencePanel({ ticket: t, user, onDone }: { ticket: Ticket; user: User
   return <section className="panel glass rise-in" style={{ padding: 22 }}>
     <header className="panel__head"><div><h3>Resolution evidence</h3><p>{canUpload ? 'Upload a photo before marking this ticket resolved.' : 'Photos added by the resolver.'}</p></div></header>
     {t.evidenceUrls?.length ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{t.evidenceUrls.map((url, index) => <a key={url} href={url} target="_blank" rel="noreferrer"><img src={url} alt={`Resolution evidence ${index + 1}`} style={{ width: 86, height: 70, objectFit: 'cover', borderRadius: 8 }} /></a>)}</div> : <p className="form-hint">No evidence uploaded yet.</p>}
-    {canUpload && <label className="btn btn-ghost" style={{ marginTop: 12, display: 'inline-flex', cursor: busy ? 'wait' : 'pointer' }}><Camera size={16} /> {busy ? 'Uploading…' : 'Upload evidence'}<input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={busy} onChange={e => { void upload(e.target.files?.[0]); e.target.value = ''; }} /></label>}
+    {canUpload && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+      <label className="btn btn-ghost" style={{ display: 'inline-flex', cursor: busy ? 'wait' : 'pointer' }}>Upload evidence<input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={busy} onChange={e => { void upload(e.target.files?.[0]); e.target.value = ''; }} /></label>
+      <label className="btn btn-ghost" style={{ display: 'inline-flex', cursor: busy ? 'wait' : 'pointer' }}><Camera size={16} /> Take photo<input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden disabled={busy} onChange={e => { void upload(e.target.files?.[0]); e.target.value = ''; }} /></label>
+    </div>}
     {error && <p className="form-error" role="alert">{error}</p>}
   </section>;
 }

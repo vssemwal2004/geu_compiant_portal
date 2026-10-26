@@ -91,7 +91,7 @@ ticketSchema.index({ creatorId: 1, idempotencyKey: 1 }, { unique: true, partialF
 
 const attachmentSchema = new Schema({
   id: { type: String, unique: true, required: true },
-  mimeType: { type: String, required: true }, data: { type: Buffer, required: true },
+  mimeType: { type: String, required: true }, data: Buffer, storageKey: String,
   sizeBytes: Number, ownerId: String, ticketId: String, expiresAt: Date,
   kind: { type: String, enum: ['ISSUE', 'EVIDENCE'], required: true },
 }, options('attachments'));

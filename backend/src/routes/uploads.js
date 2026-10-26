@@ -2,6 +2,7 @@ const express = require('express');
 const { Attachment, Ticket } = require('../models');
 const { error, wrap } = require('../services/common');
 const tickets = require('../services/tickets');
+const imageStorage = require('../services/imageStorage');
 const router = express.Router();
 const rawImage = express.raw({ type: ['image/jpeg', 'image/png', 'image/webp'], limit: '5mb' });
 router.post('/ticket-image', rawImage, wrap(async (req, res) => {
@@ -17,6 +18,8 @@ router.get('/:id', wrap(async (req, res) => {
     const ticket = await Ticket.findOne({ id: attachment.ticketId }).lean();
     if (!ticket || !tickets.visible(req.user, ticket)) error(404, 'Image not found.');
   } else if (attachment.ownerId !== req.user.id) error(404, 'Image not found.');
-  res.set('Cache-Control', 'private, max-age=300').type(attachment.mimeType).send(attachment.data);
+  const data = attachment.storageKey ? await imageStorage.getImage(attachment.storageKey) : attachment.data;
+  if (!data) error(404, 'Image not found.');
+  res.set('Cache-Control', 'private, max-age=300').type(attachment.mimeType).send(data);
 }));
 module.exports = router;

@@ -25,5 +25,9 @@ const config = {
     senderId: process.env.SMS_SENDER_ID,
     baseUrl: process.env.MSG91_SMS_URL || 'https://control.msg91.com/api/v5/flow',
   },
+  s3: {
+    bucket: process.env.S3_BUCKET,
+    region: process.env.AWS_REGION,
+  },
 };
 module.exports = config;

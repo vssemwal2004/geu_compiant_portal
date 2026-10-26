@@ -51,6 +51,7 @@ export default function CreateTicketPage() {
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState<Ticket | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const buildings = useMemo(() => permittedBuildings(user), [user]);
   const floors = buildingId ? childrenOf(buildingId) : [];
@@ -229,10 +230,24 @@ export default function CreateTicketPage() {
                 </span>
               </button>
             )}
+            <button type="button" className="btn btn-ghost" onClick={() => cameraRef.current?.click()}>
+              <Camera size={16} /> Take photo
+            </button>
             <input
               ref={fileRef}
               type="file"
               accept={MIME.join(',')}
+              className="sr-only"
+              onChange={(e) => {
+                takeFile(e.target.files?.[0]);
+                e.target.value = '';
+              }}
+            />
+            <input
+              ref={cameraRef}
+              type="file"
+              accept={MIME.join(',')}
+              capture="environment"
               className="sr-only"
               onChange={(e) => {
                 takeFile(e.target.files?.[0]);

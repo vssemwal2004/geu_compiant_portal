@@ -1,6 +1,7 @@
 const { Ticket, Location, AssetType, Attachment, Counter } = require('../models');
 const config = require('../config');
 const { id, error, text, plain, ancestry, routeFor, audit } = require('./common');
+const imageStorage = require('./imageStorage');
 const SLA_HOURS = { CRITICAL: 4, HIGH: 24, MEDIUM: 48, LOW: 96 };
 const statuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'REOPENED', 'CLOSED', 'CANCELLED'];
 const activeStatuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'REOPENED'];
@@ -38,7 +39,18 @@ async function scopedList(user, query = {}) {
 }
 async function storeImage(ownerId, kind, mimeType, buffer) {
   if (!imageTypes.includes(mimeType) || !Buffer.isBuffer(buffer) || !buffer.length || buffer.length > sizeLimit) error(400, 'Use a JPG, PNG or WebP image up to 5 MB.');
-  const attachment = await Attachment.create({ id: id(), ownerId, kind, mimeType, data: buffer, sizeBytes: buffer.length, expiresAt: new Date(Date.now() + 7 * 24 * 3600000) });
+  const attachmentId = id();
+  const storageKey = config.s3.bucket ? `attachments/${attachmentId}` : undefined;
+  if (storageKey) await imageStorage.putImage(storageKey, mimeType, buffer);
+  let attachment;
+  try {
+    attachment = await Attachment.create({ id: attachmentId, ownerId, kind, mimeType,
+      ...(storageKey ? { storageKey } : { data: buffer }), sizeBytes: buffer.length,
+      expiresAt: new Date(Date.now() + 7 * 24 * 3600000) });
+  } catch (cause) {
+    if (storageKey) await imageStorage.deleteImage(storageKey);
+    throw cause;
+  }
   return attachment.id;
 }
 async function create(user, input, opts = {}) {

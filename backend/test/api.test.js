@@ -35,6 +35,7 @@ test('MongoDB-backed role workflow, password setup, SMS login, and access contro
       await mongoose.disconnect();
     }
     process.env.MONGODB_URI = uri;
+    delete process.env.S3_BUCKET;
     process.env.MONGODB_DB_NAME = `geu_test_${Date.now()}`;
     process.env.SEED_ADMIN_EMAIL = 'admin@example.com';
     process.env.SEED_ADMIN_PASSWORD = 'TestingPass123';
@@ -127,6 +128,41 @@ test('MongoDB-backed role workflow, password setup, SMS login, and access contro
     assert.equal((await admin.get(`${root}/admin/audit-logs`)).status, 200);
     assert.equal((await admin.get(`${root}/admin/roles`)).body.length, 4);
     assert.equal((await request(app).post(`${root}/webhooks/whatsapp`).send({})).status, 401);
+    const config = require('../src/config');
+    const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+    const originalSend = S3Client.prototype.send;
+    const objects = new Map();
+    config.s3.bucket = 'geu-test-images';
+    config.s3.region = 'ap-south-1';
+    S3Client.prototype.send = async command => {
+      assert.equal(command.input.Bucket, 'geu-test-images');
+      if (command instanceof PutObjectCommand) { objects.set(command.input.Key, Buffer.from(command.input.Body)); return {}; }
+      if (command instanceof GetObjectCommand) return { Body: { transformToByteArray: async () => objects.get(command.input.Key) } };
+      if (command instanceof DeleteObjectCommand) { objects.delete(command.input.Key); return {}; }
+      throw new Error('Unexpected S3 command');
+    };
+    try {
+      const s3Ticket = await lab.post(`${root}/tickets`).send({ locationId: room, assetTypeId: asset.body.id,
+        description: 'Another computer screen is not working', imageUrl });
+      assert.equal(s3Ticket.status, 201, JSON.stringify(s3Ticket.body));
+      assert.equal((await lab.get(s3Ticket.body.imageUrl)).status, 200);
+      assert.equal((await viewer.get(s3Ticket.body.imageUrl)).status, 200);
+      assert.equal((await other.get(s3Ticket.body.imageUrl)).status, 404);
+      assert.equal((await request(app).get(s3Ticket.body.imageUrl)).status, 401);
+      const imageRecord = await require('../src/models').Attachment.findOne({ id: s3Ticket.body.imageAttachmentId }).lean();
+      assert.match(imageRecord.storageKey, /^attachments\//);
+      assert.equal(imageRecord.data, undefined);
+      const s3Evidence = await sub.post(`${root}/uploads/tickets/${s3Ticket.body.id}/evidence`)
+        .set('Content-Type', 'image/png').send(Buffer.from('s3-evidence'));
+      assert.equal(s3Evidence.status, 201, JSON.stringify(s3Evidence.body));
+      assert.equal((await viewer.get(s3Evidence.body.evidenceUrls[0])).status, 200);
+      assert.equal((await lab.get(created.body.imageUrl)).status, 200);
+      assert.equal(objects.size, 2);
+    } finally {
+      S3Client.prototype.send = originalSend;
+      config.s3.bucket = undefined;
+      config.s3.region = undefined;
+    }
     const originalFetch = global.fetch;
     let smsCode;
     global.fetch = async (url, options) => {
