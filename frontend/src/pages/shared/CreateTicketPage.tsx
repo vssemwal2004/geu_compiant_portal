@@ -41,6 +41,7 @@ export default function CreateTicketPage() {
   const [step, setStep] = useState(0);
   const [photo, setPhoto] = useState<{ url: string; name: string } | null>(null);
   const [photoError, setPhotoError] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const [dragging, setDragging] = useState(false);
   const [assetTypeId, setAssetTypeId] = useState('');
   const [buildingId, setBuildingId] = useState('');
@@ -96,6 +97,7 @@ export default function CreateTicketPage() {
 
   async function submit() {
     if (submitting || valid.slice(0, 4).some((v) => !v)) return;
+    setSubmitError('');
     setSubmitting(true);
     try {
       const ticket = await createTicket(user, {
@@ -106,7 +108,7 @@ export default function CreateTicketPage() {
       });
       setCreated(ticket);
     } catch (error) {
-      setPhotoError(error instanceof Error ? error.message : 'Could not create ticket.');
+      setSubmitError(error instanceof Error ? error.message : 'Could not create ticket.');
     } finally {
       setSubmitting(false);
     }
@@ -120,6 +122,7 @@ export default function CreateTicketPage() {
     setFloorId('');
     setLabId('');
     setDescription('');
+    setSubmitError('');
     setTouched(false);
     setCreated(null);
   }
@@ -396,6 +399,7 @@ export default function CreateTicketPage() {
           <div className="wizard__step">
             <h3>Review and submit</h3>
             <p className="wizard__lead">Check the details. You can edit any step.</p>
+            {submitError && <p className="form-error" role="alert">{submitError}</p>}
 
             <div className="review">
               {photo && <img src={photo.url} alt="Problem photo" className="review__photo" />}
